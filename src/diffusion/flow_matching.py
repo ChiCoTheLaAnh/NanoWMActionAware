@@ -22,10 +22,16 @@ API is intentionally identical to GaussianDiffusion so the training loop,
 sampling utilities, and dfot_sample() all work without modification.
 """
 
+import enum
 import torch
 import torch.nn as nn
 import numpy as np
 from typing import Optional
+
+
+class PredName(enum.Enum):
+    """Routing sentinel used by create_diffusion() to select FlowMatching."""
+    FLOW = "flow"
 
 
 def _mean_flat(tensor: torch.Tensor) -> torch.Tensor:
