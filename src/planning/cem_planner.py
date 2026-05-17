@@ -24,6 +24,7 @@ class CEMPlanner:
         sigma_min: float = 1e-3,
         action_low: Optional[float] = None,
         action_high: Optional[float] = None,
+        rollout_batch_size: Optional[int] = None,
     ):
         """
         Initialize CEM planner.
@@ -57,6 +58,43 @@ class CEMPlanner:
         # Optional clip range to keep samples in-distribution.
         self.action_low = action_low
         self.action_high = action_high
+        self.rollout_batch_size = rollout_batch_size
+
+    def _compute_losses_for_samples(
+        self,
+        obs_0_single: Dict[str, torch.Tensor],
+        z_obs_g_single: Dict[str, Optional[torch.Tensor]],
+        action_samples: torch.Tensor,
+    ) -> torch.Tensor:
+        """Roll out CEM samples, optionally chunked to avoid large SDPA kernels."""
+        if self.rollout_batch_size is None or self.rollout_batch_size <= 0:
+            rollout_batch_size = self.num_samples
+        else:
+            rollout_batch_size = min(int(self.rollout_batch_size), self.num_samples)
+
+        losses = []
+        for start in range(0, self.num_samples, rollout_batch_size):
+            end = min(start + rollout_batch_size, self.num_samples)
+            cur_actions = action_samples[start:end]
+            cur_n = cur_actions.shape[0]
+
+            obs_0_expanded = {
+                k: v.expand(cur_n, *v.shape[1:])
+                for k, v in obs_0_single.items()
+            }
+            z_obs_g_expanded = {
+                k: v.expand(cur_n, *v.shape[1:]) if v is not None else None
+                for k, v in z_obs_g_single.items()
+            }
+
+            with torch.no_grad():
+                z_obses, _ = self.world_model.rollout(
+                    obs_0=obs_0_expanded,
+                    act=cur_actions,
+                )
+                losses.append(self.objective_fn(z_obses, z_obs_g_expanded))
+
+        return torch.cat(losses, dim=0)
 
     def init_mu_sigma(self, batch_size: int, actions: Optional[torch.Tensor] = None):
         """
@@ -141,27 +179,16 @@ class CEMPlanner:
                         max=self.action_high if self.action_high is not None else float("inf"),
                     )
 
-                # Expand obs_0 for all samples
-                obs_0_expanded = {
-                    k: v[b:b+1].expand(self.num_samples, *v.shape[1:])
-                    for k, v in obs_0.items()
-                }
-
-                # Expand z_obs_g for all samples
-                z_obs_g_expanded = {
-                    k: v[b:b+1].expand(self.num_samples, *v.shape[1:]) if v is not None else None
+                obs_0_single = {k: v[b:b+1] for k, v in obs_0.items()}
+                z_obs_g_single = {
+                    k: v[b:b+1] if v is not None else None
                     for k, v in z_obs_g.items()
                 }
-
-                # Rollout world model
-                with torch.no_grad():
-                    z_obses, _ = self.world_model.rollout(
-                        obs_0=obs_0_expanded,
-                        act=action_samples,
-                    )
-
-                # Compute objective
-                loss = self.objective_fn(z_obses, z_obs_g_expanded)
+                loss = self._compute_losses_for_samples(
+                    obs_0_single=obs_0_single,
+                    z_obs_g_single=z_obs_g_single,
+                    action_samples=action_samples,
+                )
 
                 # Select top-k
                 topk_idx = torch.argsort(loss)[:self.topk]

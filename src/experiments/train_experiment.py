@@ -13,7 +13,6 @@ from omegaconf import OmegaConf
 from pytorch_lightning import LightningModule, Trainer
 from pytorch_lightning.plugins.environments import LightningEnvironment  # noqa: kept for back-compat
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
-from diffusers.models import AutoencoderKL
 from diffusers.optimization import get_scheduler
 
 
@@ -34,7 +33,8 @@ def _seed_worker(worker_id: int) -> None:
     random.seed(worker_seed)
     np.random.seed(worker_seed)
 
-from callbacks import CUDACallback, MetricsLogger
+from callbacks import CUDACallback, LatentMetricsLogger, MetricsLogger
+from latent_codecs import build_latent_codec, resolve_latent_codec_config
 from models import get_models
 from wm_datasets import create_train_val_datasets
 from diffusion import create_diffusion, sample_training_timesteps
@@ -45,7 +45,6 @@ from utils.nanowm_utils import (
 )
 from utils.distributed_utils import is_rank_zero
 from utils.logger_utils import create_tensorboard_logger, create_wandb_logger
-from utils.vae_ops import encode_first_stage, decode_first_stage, vae_autocast_context
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import get_original_cwd
 
@@ -82,19 +81,23 @@ class NanoWMTrainingModule(LightningModule):
             snr_gamma=args.experiment.diffusion.snr_gamma,
             zero_terminal_snr=args.experiment.diffusion.zero_terminal_snr,
         )
-        print(f"[Init] Loading VAE from: {args.vae_model_path}", flush=True)
-        self.vae = AutoencoderKL.from_pretrained(args.vae_model_path, subfolder="vae")
-        # Trust whatever VAE was passed in — read its own scaling factor rather
-        # than baking in 0.18215 (SD 1.x) or any other constant. PixArt/SDXL use
-        # 0.13025, Flux uses 0.3611, etc.
-        self.vae_scale_factor = self.vae.config.scaling_factor
-        self._vae_precision = args.experiment.infra.vae_precision
+        self.latent_codec_config = resolve_latent_codec_config(args)
         print(
-            f"[Init] VAE loaded, scaling_factor={self.vae_scale_factor}, "
-            f"vae_precision={self._vae_precision}",
+            f"[Init] Loading latent codec={self.latent_codec_config.kind} "
+            f"from: {self.latent_codec_config.model_path}",
             flush=True,
         )
-        self._sanity_check_vae(args)
+        self.latent_codec = build_latent_codec(args)
+        # Keep SD-VAE registered as `vae` for backward-compatible PL checkpoints.
+        self.vae = getattr(self.latent_codec, "vae", None)
+        self.vae_scale_factor = getattr(getattr(self.vae, "config", None), "scaling_factor", None)
+        self._vae_precision = self.latent_codec_config.precision
+        print(
+            f"[Init] Latent codec loaded, shape={self.latent_codec_config.latent_shape.as_tuple()}, "
+            f"scaling_factor={self.vae_scale_factor}, vae_precision={self._vae_precision}",
+            flush=True,
+        )
+        self._sanity_check_latent_codec(args)
         self.opt = torch.optim.AdamW(
             self.model.parameters(),
             lr=args.experiment.training.optimizer.lr,
@@ -102,37 +105,50 @@ class NanoWMTrainingModule(LightningModule):
         )
         self.lr_scheduler = None
 
-        self.vae.requires_grad_(False)
+        self.latent_codec.requires_grad_(False)
+        self.latent_codec.eval()
         self.model.train()
         print("[Init] NanoWMTrainingModule initialized", flush=True)
 
-    def _sanity_check_vae(self, args):
-        """Encode+decode a random batch to catch VAE NaN issues at init time."""
+    def _sanity_check_latent_codec(self, args):
+        """Encode+decode a random batch to catch codec shape and NaN issues."""
         H = args.model.image_size
         probe = torch.randn(1, 3, H, H)
         with torch.no_grad():
-            with vae_autocast_context(self.vae, self._vae_precision):
-                z = self.vae.encode(probe).latent_dist.sample()
-                recon = self.vae.decode(z).sample
+            z = self.latent_codec.encode(probe)
+            recon = self.latent_codec.decode(z) if self.latent_codec.has_decoder else None
+        expected_shape = self.latent_codec.latent_shape.as_tuple()
+        actual_shape = tuple(z.shape[1:])
+        if actual_shape != expected_shape:
+            raise RuntimeError(
+                f"Latent codec produced shape {actual_shape}, expected {expected_shape}. "
+                "Check model.latent_size/model.latent_channels against the codec."
+            )
         if not torch.isfinite(z).all():
             raise RuntimeError(
-                f"VAE encode produced NaN/Inf at init "
-                f"(vae_precision={self._vae_precision}, path={args.vae_model_path}). "
+                f"Latent codec encode produced NaN/Inf at init "
+                f"(precision={self._vae_precision}, path={self.latent_codec_config.model_path}). "
                 "If using SDXL/PixArt VAE under bf16, try "
                 "experiment.infra.vae_precision=fp32."
             )
-        if not torch.isfinite(recon).all():
+        if recon is not None and not torch.isfinite(recon).all():
             raise RuntimeError(
-                f"VAE decode produced NaN/Inf at init "
-                f"(vae_precision={self._vae_precision}, path={args.vae_model_path})."
+                f"Latent codec decode produced NaN/Inf at init "
+                f"(precision={self._vae_precision}, path={self.latent_codec_config.model_path})."
             )
-        print(f"[Init] VAE sanity: clean under vae_precision={self._vae_precision}", flush=True)
+        print(f"[Init] Latent codec sanity: clean under precision={self._vae_precision}", flush=True)
 
     def _vae_encode(self, x):
-        return encode_first_stage(self.vae, x, precision=self._vae_precision)
+        self.latent_codec.to(x.device)
+        return self.latent_codec.encode(x)
 
     def _vae_decode(self, z):
-        return decode_first_stage(self.vae, z, precision=self._vae_precision)
+        if not self.latent_codec.has_decoder:
+            raise NotImplementedError(
+                f"latent_codec.kind={self.latent_codec.kind} has no decoder; pixel logging/sampling is unavailable"
+            )
+        self.latent_codec.to(z.device)
+        return self.latent_codec.decode(z)
 
     def _load_pretrained_parameters(self, args):
         """Strict-load pretrained weights into self.model.
@@ -281,7 +297,7 @@ class NanoWMTrainingModule(LightningModule):
         return loss
 
     @torch.no_grad()
-    def log_images(self, batch, split="train", sampled_img_num=None, **kwargs):
+    def log_latents(self, batch, split="train", sampled_img_num=None, **kwargs):
         x = batch["video"].to(self.device)
         B, F, C, H, W = x.shape
 
@@ -331,6 +347,25 @@ class NanoWMTrainingModule(LightningModule):
             progress=False,
             history_stabilization_level=self.args.experiment.diffusion.history_stabilization_level,
         )
+
+        return {
+            "samples": z_sample,
+            "gt": z,
+            "n_context": n_context,
+        }
+
+    @torch.no_grad()
+    def log_images(self, batch, split="train", sampled_img_num=None, **kwargs):
+        if not self.latent_codec.has_decoder:
+            raise NotImplementedError(
+                f"latent_codec.kind={self.latent_codec.kind} has no decoder; use log_latents() instead"
+            )
+
+        latent_logs = self.log_latents(batch, split=split, sampled_img_num=sampled_img_num, **kwargs)
+        z_sample = latent_logs["samples"]
+        z = latent_logs["gt"]
+        B = z.shape[0]
+        x = batch["video"].to(self.device)
 
         with torch.no_grad():
             z_sample_flat = rearrange(z_sample, "b f c h w -> (b f) c h w").contiguous()
@@ -653,7 +688,26 @@ class TrainExperiment(BaseExperiment):
 
         eval_cfg = args.experiment.evaluation
         eval_metrics_cfg = eval_cfg.metrics
-        if eval_metrics_cfg.evaluate:
+        if eval_metrics_cfg.evaluate and not pl_module.latent_codec.has_decoder:
+            if is_rank_zero:
+                print(
+                    f"[Eval] Using latent-only metrics because latent_codec.kind="
+                    f"{pl_module.latent_codec.kind} is encoder-only; skipping pixel videos/FID/FVD/LPIPS",
+                    flush=True,
+                )
+            log_latents_kwargs = {}
+            eval_scheduling_mode = eval_cfg.get("scheduling_mode")
+            if eval_scheduling_mode is not None:
+                log_latents_kwargs["scheduling_mode"] = eval_scheduling_mode
+            eval_num_sampling_steps = eval_cfg.get("num_sampling_steps")
+            if eval_num_sampling_steps is not None:
+                log_latents_kwargs["ddim_steps"] = eval_num_sampling_steps
+            callbacks_list.append(LatentMetricsLogger(
+                log_every_n_train_steps=eval_metrics_cfg.log_every_n_train_steps,
+                log_latents_kwargs=log_latents_kwargs,
+                evaluate=eval_metrics_cfg.evaluate,
+            ))
+        elif eval_metrics_cfg.evaluate:
             i3d_path = eval_metrics_cfg.i3d_model_path
             if i3d_path and not os.path.isabs(i3d_path):
                 i3d_path = os.path.join(get_original_cwd(), i3d_path)
@@ -667,6 +721,9 @@ class TrainExperiment(BaseExperiment):
             eval_scheduling_mode = eval_cfg.get("scheduling_mode")
             if eval_scheduling_mode is not None:
                 log_images_kwargs["scheduling_mode"] = eval_scheduling_mode
+            eval_num_sampling_steps = eval_cfg.get("num_sampling_steps")
+            if eval_num_sampling_steps is not None:
+                log_images_kwargs["ddim_steps"] = eval_num_sampling_steps
 
             callbacks_list.append(MetricsLogger(
                 env=args.dataset,

@@ -1,17 +1,18 @@
 """Planning experiment with diffusion-based world models (MPC via CEM)."""
 
 import json
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, Optional
 
 import numpy as np
 import torch
 import imageio
-from diffusers import AutoencoderKL
 from omegaconf import OmegaConf
 
 from .base import BaseExperiment
 from diffusion import create_diffusion
+from latent_codecs import build_latent_codec
 from models import get_models
 from planning import (
     CEMPlanner,
@@ -20,6 +21,16 @@ from planning import (
     create_objective_fn,
 )
 from planning.envs import create_planning_env
+
+
+@dataclass
+class PlanningGoal:
+    init_state: np.ndarray
+    goal_state: np.ndarray
+    env_info: Optional[Dict[str, Any]]
+    goal_meta: Dict[str, Any]
+    init_obs: Optional[Dict[str, Any]] = None
+    goal_obs: Optional[Dict[str, Any]] = None
 
 
 class PlanningExperiment(BaseExperiment):
@@ -34,8 +45,8 @@ class PlanningExperiment(BaseExperiment):
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        # --- Load model + VAE + diffusion from checkpoint ---
-        model, vae, diffusion, train_cfg = self._load_from_checkpoint(
+        # --- Load model + latent codec + diffusion from checkpoint ---
+        model, latent_codec, diffusion, train_cfg = self._load_from_checkpoint(
             cfg.ckpt_path, device
         )
 
@@ -44,7 +55,7 @@ class PlanningExperiment(BaseExperiment):
         if plan_cfg.get("num_sampling_steps") is not None:
             wm_cfg.model.num_sampling_steps = plan_cfg.num_sampling_steps
 
-        world_model = DiffusionWorldModel(model, vae, diffusion, wm_cfg)
+        world_model = DiffusionWorldModel(model, latent_codec, diffusion, wm_cfg)
 
         # --- Preprocessor (action normalization stats from dataset) ---
         preprocessor = self._build_preprocessor(train_cfg, device)
@@ -70,10 +81,28 @@ class PlanningExperiment(BaseExperiment):
                 seed=plan_cfg.seed,
             )
         else:
-            goals = [
-                (*env.sample_random_init_goal_states(seed=plan_cfg.seed + i), None)
-                for i in range(n_evals)
-            ]
+            goals = []
+            for i in range(n_evals):
+                init_state, goal_state = env.sample_random_init_goal_states(seed=plan_cfg.seed + i)
+                goals.append(
+                    PlanningGoal(
+                        init_state=np.asarray(init_state),
+                        goal_state=np.asarray(goal_state),
+                        env_info=None,
+                        goal_meta={
+                            "source": "random_state",
+                            "episode": int(i),
+                            "seed": int(plan_cfg.seed + i),
+                        },
+                    )
+                )
+
+        out_dir = Path(plan_cfg.get("output_dir", "planning_results"))
+        out_dir.mkdir(parents=True, exist_ok=True)
+        targets_path = out_dir / "planning_targets.json"
+        with open(targets_path, "w") as f:
+            json.dump(self._serialize_goals(goals), f, indent=2)
+        print(f"Planning targets saved to {targets_path}")
 
         # --- Planner ---
         action_dim = train_cfg.dataset.spec.action_dim
@@ -83,6 +112,8 @@ class PlanningExperiment(BaseExperiment):
             alpha=plan_cfg.objective.alpha,
             base=plan_cfg.objective.base,
             mode=plan_cfg.objective.mode,
+            visual_metric=plan_cfg.objective.get("visual_metric", "mse"),
+            token_dim=plan_cfg.objective.get("token_dim", None),
         )
 
         planner = CEMPlanner(
@@ -98,6 +129,7 @@ class PlanningExperiment(BaseExperiment):
             sigma_min=plan_cfg.cem.get("sigma_min", 1e-3),
             action_low=plan_cfg.cem.get("action_low", None),
             action_high=plan_cfg.cem.get("action_high", None),
+            rollout_batch_size=plan_cfg.cem.get("rollout_batch_size", None),
             name="CEM",
             device=str(device),
         )
@@ -119,11 +151,9 @@ class PlanningExperiment(BaseExperiment):
         )
 
         # --- Save ---
-        out_dir = Path(plan_cfg.get("output_dir", "planning_results"))
-        out_dir.mkdir(parents=True, exist_ok=True)
         results_path = out_dir / "planning_results.json"
         with open(results_path, "w") as f:
-            json.dump(results, f, indent=2)
+            json.dump(self._json_safe(results), f, indent=2)
 
         print(f"\nResults saved to {results_path}")
         print(f"Success rate: {results['success_rate']:.2%}")
@@ -153,7 +183,7 @@ class PlanningExperiment(BaseExperiment):
             print(f"Model loaded from HF: {ckpt_path_str}")
         else:
             # Local checkpoint — walk up from ckpt to find config.yaml
-            ckpt_path = Path(ckpt_path_str)
+            ckpt_path = Path(ckpt_path_str).expanduser().resolve()
             train_config_path = None
             for ancestor in [ckpt_path.parent] + list(ckpt_path.parents):
                 candidate = ancestor / "config.yaml"
@@ -189,21 +219,7 @@ class PlanningExperiment(BaseExperiment):
             model.eval()
             print(f"Model loaded from {ckpt_path}")
 
-        # Resolve VAE path (handle OmegaConf interpolation)
-        try:
-            vae_path = train_cfg.vae_model_path
-        except Exception:
-            vae_path = "stabilityai/sd-vae-ft-mse"
-
-        # Local path may point to parent dir containing vae/ subfolder
-        vae_local = Path(vae_path)
-        if vae_local.is_dir() and not (vae_local / "config.json").exists():
-            sub = vae_local / "vae"
-            if sub.is_dir() and (sub / "config.json").exists():
-                vae_path = str(sub)
-
-        vae = AutoencoderKL.from_pretrained(vae_path)
-        vae = vae.to(device).eval()
+        latent_codec = build_latent_codec(train_cfg).to(device).eval()
 
         diffusion = create_diffusion(
             timestep_respacing="",
@@ -213,7 +229,7 @@ class PlanningExperiment(BaseExperiment):
             snr_gamma=train_cfg.experiment.diffusion.snr_gamma,
             zero_terminal_snr=train_cfg.experiment.diffusion.zero_terminal_snr,
         )
-        return model, vae, diffusion, train_cfg
+        return model, latent_codec, diffusion, train_cfg
 
     def _build_preprocessor(self, train_cfg, device):
         image_size = train_cfg.get("image_size", train_cfg.model.get("image_size", 256))
@@ -337,6 +353,12 @@ class PlanningExperiment(BaseExperiment):
                 else:
                     wall_locations = t
 
+        shapes = None
+        shapes_path = val_path / "shapes.pkl"
+        if shapes_path.exists():
+            with open(shapes_path, "rb") as f:
+                shapes = _pickle.load(f)
+
         # Sequence lengths (default to full traj length when not provided).
         seq_path_pkl = val_path / "seq_lengths.pkl"
         seq_path_pth = val_path / "seq_lengths.pth"
@@ -371,20 +393,148 @@ class PlanningExperiment(BaseExperiment):
                     "fix_wall_location": wall_locations[traj_id, 0],
                 }
                 env.update_env(env_info)
+            elif shapes is not None and hasattr(env, "update_env"):
+                env_info = {"shape": shapes[traj_id]}
+                env.update_env(env_info)
 
             ep_seed = seed + ep_idx
-            env.prepare(ep_seed, init_state)
+            init_obs, _ = env.prepare(ep_seed, init_state)
             cur_state = init_state
             for a in act_seq:
-                _, _, _, info = env.step(a)
+                goal_obs, _, _, info = env.step(a)
                 cur_state = info.get("state", cur_state)
             goal_state = np.asarray(cur_state)
-            goals.append((init_state, goal_state, env_info))
+            goals.append(
+                PlanningGoal(
+                    init_state=np.asarray(init_state),
+                    goal_state=goal_state,
+                    env_info=env_info,
+                    goal_meta={
+                        "source": "dset",
+                        "episode": int(ep_idx),
+                        "seed": int(ep_seed),
+                        "val_path": str(val_path),
+                        "traj_id": int(traj_id),
+                        "offset": int(offset),
+                        "traj_len": int(traj_len),
+                        "frame_interval": int(frame_interval),
+                        "goal_H": int(goal_H),
+                    },
+                    init_obs=self._copy_obs_dict(init_obs),
+                    goal_obs=self._copy_obs_dict(goal_obs),
+                )
+            )
         return goals
 
-    def _render_state(self, env, seed, state, image_size, device):
-        """Render a state to a [1, 1, 3, H, W] tensor in [-1, 1]."""
-        obs, _ = env.prepare(seed, state)
+    def _serialize_goals(self, goals):
+        records = []
+        for ep_idx, goal in enumerate(goals):
+            goal = self._coerce_goal(goal)
+            records.append({
+                "episode": int(ep_idx),
+                "init_state": self._json_safe(goal.init_state),
+                "goal_state": self._json_safe(goal.goal_state),
+                "env_info": self._json_safe(goal.env_info),
+                "goal_meta": self._json_safe(goal.goal_meta),
+            })
+        return records
+
+    @staticmethod
+    def _copy_obs_dict(obs: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        if obs is None:
+            return None
+        copied = {}
+        for key, value in obs.items():
+            if isinstance(value, torch.Tensor):
+                copied[key] = value.detach().cpu().clone()
+            elif isinstance(value, np.ndarray):
+                copied[key] = value.copy()
+            else:
+                copied[key] = value
+        return copied
+
+    @staticmethod
+    def _coerce_goal(goal) -> PlanningGoal:
+        """Accept old tuple goals while using an explicit type internally."""
+        if isinstance(goal, PlanningGoal):
+            return goal
+        if len(goal) == 5:
+            init_state, goal_state, env_info, goal_meta, goal_obs = goal
+            return PlanningGoal(
+                init_state=np.asarray(init_state),
+                goal_state=np.asarray(goal_state),
+                env_info=env_info,
+                goal_meta=goal_meta,
+                goal_obs=goal_obs,
+            )
+        if len(goal) == 4:
+            init_state, goal_state, env_info, goal_meta = goal
+        else:
+            init_state, goal_state, env_info = goal
+            goal_meta = {}
+        return PlanningGoal(
+            init_state=np.asarray(init_state),
+            goal_state=np.asarray(goal_state),
+            env_info=env_info,
+            goal_meta=goal_meta,
+        )
+
+    @staticmethod
+    def _json_safe(obj):
+        if obj is None:
+            return None
+        if isinstance(obj, Path):
+            return str(obj)
+        if isinstance(obj, torch.Tensor):
+            return PlanningExperiment._json_safe(obj.detach().cpu().numpy())
+        if isinstance(obj, np.ndarray):
+            return PlanningExperiment._json_safe(obj.tolist())
+        if isinstance(obj, np.generic):
+            return PlanningExperiment._json_safe(obj.item())
+        if isinstance(obj, float):
+            return obj if np.isfinite(obj) else None
+        if isinstance(obj, (str, int, bool)):
+            return obj
+        if isinstance(obj, dict):
+            return {str(k): PlanningExperiment._json_safe(v) for k, v in obj.items()}
+        if isinstance(obj, (list, tuple)):
+            return [PlanningExperiment._json_safe(v) for v in obj]
+        return str(obj)
+
+    @staticmethod
+    def _metric_values(all_metrics, key):
+        vals = []
+        for m in all_metrics:
+            value = m.get(key)
+            if value is None:
+                continue
+            value = float(value)
+            if np.isfinite(value):
+                vals.append(value)
+        return np.asarray(vals, dtype=np.float64)
+
+    @staticmethod
+    def _metric_summary(name, values):
+        if values.size == 0:
+            return {
+                f"{name}_mean": None,
+                f"{name}_median": None,
+                f"{name}_std": None,
+                f"{name}_stderr": None,
+                f"{name}_min": None,
+                f"{name}_max": None,
+            }
+        return {
+            f"{name}_mean": float(np.mean(values)),
+            f"{name}_median": float(np.median(values)),
+            f"{name}_std": float(np.std(values)),
+            f"{name}_stderr": float(np.std(values) / np.sqrt(values.size)),
+            f"{name}_min": float(np.min(values)),
+            f"{name}_max": float(np.max(values)),
+        }
+
+    def _obs_to_tensor(self, obs: Dict[str, Any], image_size, device):
+        """Convert an env observation to a [1, 1, 3, H, W] tensor in [-1, 1]."""
         img = obs["visual"]  # numpy (H, W, C) uint8 or torch
         if isinstance(img, torch.Tensor):
             img = img.cpu().numpy()
@@ -394,6 +544,11 @@ class PlanningExperiment(BaseExperiment):
         t = torch.from_numpy(img).permute(2, 0, 1).float() / 255.0 * 2.0 - 1.0
         t = resize(t, [image_size, image_size], antialias=True)
         return t.unsqueeze(0).unsqueeze(0).to(device)  # [1,1,3,H,W]
+
+    def _render_state(self, env, seed, state, image_size, device):
+        """Render a state by resetting the env. Use only outside live rollouts."""
+        obs, _ = env.prepare(seed, state)
+        return self._obs_to_tensor(obs, image_size, device)
 
     def _obs_to_frame(self, obs_dict, image_size):
         """Convert env obs dict to uint8 numpy (H, W, 3) for video saving."""
@@ -408,6 +563,12 @@ class PlanningExperiment(BaseExperiment):
         img = np.array(Image.fromarray(img).resize((image_size, image_size)))
         return img
 
+    def _tensor_obs_to_frame(self, obs_tensor):
+        """Convert [1, 1, 3, H, W] in [-1, 1] to uint8 HWC."""
+        img = obs_tensor[0, 0].detach().cpu().permute(1, 2, 0).numpy()
+        img = ((np.clip(img, -1, 1) + 1.0) / 2.0 * 255.0).astype(np.uint8)
+        return img
+
     def _run_mpc(
         self, env, planner, preprocessor, goals, plan_cfg,
         image_size, frame_interval, device,
@@ -420,8 +581,12 @@ class PlanningExperiment(BaseExperiment):
 
         all_metrics = []
 
-        for ep_idx, goal_tuple in enumerate(goals):
-            init_state, goal_state, env_info = goal_tuple
+        for ep_idx, goal_item in enumerate(goals):
+            goal = self._coerce_goal(goal_item)
+            init_state = goal.init_state
+            goal_state = goal.goal_state
+            env_info = goal.env_info
+            goal_meta = goal.goal_meta
             seed = plan_cfg.seed + ep_idx
             print(f"\n[Episode {ep_idx+1}/{len(goals)}]")
 
@@ -430,18 +595,30 @@ class PlanningExperiment(BaseExperiment):
             if env_info is not None and hasattr(env, "update_env"):
                 env.update_env(env_info)
 
-            # Render goal observation
-            obs_g_tensor = self._render_state(env, seed + 10000, goal_state, image_size, device)
+            # DINO-WM uses the goal observation from the replayed trajectory. If it is not
+            # available (e.g. random_state goals), render it by resetting outside the live rollout.
+            if goal.goal_obs is not None:
+                obs_g_tensor = self._obs_to_tensor(goal.goal_obs, image_size, device)
+            else:
+                obs_g_tensor = self._render_state(env, seed + 10000, goal_state, image_size, device)
+            goal_frame = self._tensor_obs_to_frame(obs_g_tensor)
 
             # Reset env to init state (re-apply env_info — _render_state above may have reset it)
             if env_info is not None and hasattr(env, "update_env"):
                 env.update_env(env_info)
             obs_dict, cur_state = env.prepare(seed, init_state)
-            obs_0_tensor = self._render_state(env, seed, init_state, image_size, device)
+            obs_0_source = goal.init_obs if goal.init_obs is not None else obs_dict
+            obs_0_tensor = self._obs_to_tensor(obs_0_source, image_size, device)
 
-            frames = [self._obs_to_frame(obs_dict, image_size)]
+            frames = [self._obs_to_frame(obs_0_source, image_size)]
             prev_actions = None
             done = False
+            success_step = None
+
+            def _to_np(x):
+                if isinstance(x, torch.Tensor):
+                    return x.detach().cpu().numpy()
+                return np.asarray(x)
 
             for step in range(max_steps):
                 if step % replan_every == 0:
@@ -477,14 +654,21 @@ class PlanningExperiment(BaseExperiment):
                 if done:
                     break
 
-                # Update current observation for next replan
-                obs_0_tensor = self._render_state(env, seed, cur_state, image_size, device)
+                # Keep the live env continuous. Do not call _render_state() here because it
+                # resets PushT and drops simulator state between action chunks.
+                obs_0_tensor = self._obs_to_tensor(obs_dict, image_size, device)
+
+                # DINO-WM's MPC evaluator checks success after each executed chunk.
+                # Stop the episode once the goal is reached instead of judging only
+                # the state after the full max_episode_steps budget.
+                is_checkpoint = ((step + 1) % replan_every == 0) or (step + 1 == max_steps)
+                if is_checkpoint:
+                    checkpoint_eval = env.eval_state(_to_np(goal_state), _to_np(cur_state))
+                    if bool(checkpoint_eval["success"]):
+                        success_step = step + 1
+                        break
 
             # Evaluate (some envs mix np / torch, normalize to numpy)
-            def _to_np(x):
-                if isinstance(x, torch.Tensor):
-                    return x.detach().cpu().numpy()
-                return np.asarray(x)
             gs_np = _to_np(goal_state)
             cs_np = _to_np(cur_state)
             eval_result = env.eval_state(gs_np, cs_np)
@@ -493,28 +677,49 @@ class PlanningExperiment(BaseExperiment):
             xy_dist = float(np.linalg.norm(gs_np[:2] - cs_np[:2])) if gs_np.ndim == 1 and gs_np.shape[0] >= 2 else float("nan")
             # pusht success uses first-4 dims (agent + T-block xy); print it for diagnosis.
             pos4_dist = float(np.linalg.norm(gs_np[:4] - cs_np[:4])) if gs_np.ndim == 1 and gs_np.shape[0] >= 4 else float("nan")
-            print(f"  success={bool(success)}, state_dist={state_dist:.4f}, xy_dist={xy_dist:.4f}, pos4_dist={pos4_dist:.4f}, steps={len(frames)-1}")
+            if gs_np.ndim == 1 and gs_np.shape[0] >= 5:
+                angle_diff = float(abs(gs_np[4] - cs_np[4]))
+                angle_dist = float(min(angle_diff, 2 * np.pi - angle_diff))
+            else:
+                angle_dist = float("nan")
+            print(f"  success={bool(success)}, state_dist={state_dist:.4f}, xy_dist={xy_dist:.4f}, pos4_dist={pos4_dist:.4f}, angle_dist={angle_dist:.4f}, steps={len(frames)-1}")
 
             metrics = {
+                "episode": int(ep_idx),
+                "seed": int(seed),
                 "success": success,
                 "state_dist": state_dist,
+                "xy_dist": xy_dist,
+                "pos4_dist": pos4_dist,
+                "angle_dist": angle_dist,
                 "n_steps": len(frames) - 1,
+                "success_step": success_step,
+                "goal_meta": self._json_safe(goal_meta),
             }
             all_metrics.append(metrics)
 
             # Save video
             if ep_idx < n_plot:
                 vid_path = out_dir / f"episode_{ep_idx:03d}.mp4"
-                imageio.mimwrite(str(vid_path), frames, fps=10, quality=8)
+                frames_with_goal = [
+                    np.concatenate([frame, goal_frame], axis=1)
+                    for frame in frames
+                ]
+                imageio.mimwrite(str(vid_path), frames_with_goal, fps=10, quality=8)
                 print(f"  Video saved: {vid_path}")
 
-        success_rate = np.mean([m["success"] for m in all_metrics])
-        state_dist_mean = np.mean([m["state_dist"] for m in all_metrics])
+        success_values = self._metric_values(all_metrics, "success")
+        success_rate = float(np.mean(success_values)) if success_values.size else 0.0
+        success_count = int(np.sum(success_values)) if success_values.size else 0
 
         results = {
-            "success_rate": float(success_rate),
-            "state_dist_mean": float(state_dist_mean),
+            "success_rate": success_rate,
+            "success_count": success_count,
             "n_episodes": len(all_metrics),
+            "planning_config": self._json_safe(OmegaConf.to_container(plan_cfg, resolve=True)),
             "per_episode": all_metrics,
         }
+
+        for key in ("state_dist", "xy_dist", "pos4_dist", "angle_dist", "n_steps"):
+            results.update(self._metric_summary(key, self._metric_values(all_metrics, key)))
         return results

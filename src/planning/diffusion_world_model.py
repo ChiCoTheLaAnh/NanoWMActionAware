@@ -4,11 +4,10 @@ from typing import Dict, Optional, Tuple
 
 import torch
 import torch.nn as nn
-from diffusers import AutoencoderKL
 
 from diffusion.df_sample import dfot_sample
 from diffusion.gaussian_diffusion import GaussianDiffusion
-from utils.vae_ops import encode_first_stage
+from latent_codecs import LatentCodec
 
 
 class DiffusionWorldModel(nn.Module):
@@ -17,7 +16,7 @@ class DiffusionWorldModel(nn.Module):
     def __init__(
         self,
         model: nn.Module,
-        vae: AutoencoderKL,
+        latent_codec: LatentCodec,
         diffusion: GaussianDiffusion,
         args,
     ):
@@ -26,18 +25,19 @@ class DiffusionWorldModel(nn.Module):
 
         Args:
             model: NanoWM transformer model
-            vae: VAE encoder/decoder
+            latent_codec: visual latent encoder/decoder adapter
             diffusion: Gaussian diffusion process
             args: Training/sampling config
         """
         super().__init__()
         self.model = model
-        self.vae = vae
+        self.latent_codec = latent_codec
+        self.vae = getattr(latent_codec, "vae", None)  # kept for SD-VAE debugging/back-compat
         self.diffusion = diffusion
         self.args = args
         self.device = next(model.parameters()).device
-        self.vae_scale_factor = vae.config.scaling_factor
-        self.vae_precision = getattr(args.experiment.infra, "vae_precision", "fp32")
+        self.vae_scale_factor = getattr(getattr(self.vae, "config", None), "scaling_factor", None)
+        self.vae_precision = getattr(latent_codec, "precision", getattr(args.experiment.infra, "vae_precision", "fp32"))
 
     @torch.no_grad()
     def encode_obs(self, obs: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
@@ -58,7 +58,7 @@ class DiffusionWorldModel(nn.Module):
         B, T, C, H, W = frames.shape
 
         frames_flat = frames.reshape(B * T, C, H, W)
-        latents = encode_first_stage(self.vae, frames_flat, precision=self.vae_precision)
+        latents = self.latent_codec.encode(frames_flat)
 
         # Get feature embeddings from NanoWM encoder
         # Use the model's patch embedding and positional encoding
@@ -101,7 +101,7 @@ class DiffusionWorldModel(nn.Module):
 
         # Encode initial context
         ctx_flat = context_frames.reshape(B, C, H, W)
-        ctx_latents = encode_first_stage(self.vae, ctx_flat, precision=self.vae_precision)
+        ctx_latents = self.latent_codec.encode(ctx_flat)
         # ctx_latents: [B, C_lat, H_lat, W_lat]
 
         all_latents = [ctx_latents.unsqueeze(1)]  # list of [B, 1, C_lat, H_lat, W_lat]

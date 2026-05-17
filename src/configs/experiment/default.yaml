@@ -33,6 +33,7 @@ evaluation:
   validation_size: 32
   save_videos: true
   scheduling_mode: null
+  num_sampling_steps: null
   metrics:
     evaluate: true
     log_every_n_train_steps: 5000

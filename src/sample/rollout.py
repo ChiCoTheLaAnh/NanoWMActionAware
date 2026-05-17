@@ -16,9 +16,14 @@ import argparse
 from pathlib import Path
 from einops import rearrange
 from omegaconf import OmegaConf
-from diffusers.models import AutoencoderKL
 from tqdm.auto import tqdm
 
+from latent_codecs import (
+    get_model_latent_channels,
+    get_model_latent_size,
+    load_autoencoder_kl,
+    resolve_latent_codec_config,
+)
 from models import get_models
 from diffusion import create_diffusion
 from utils.nanowm_utils import find_model
@@ -37,7 +42,8 @@ def main(args):
     save_dir.mkdir(parents=True, exist_ok=True)
     
     print("Loading model...")
-    latent_size = args.model.image_size // 8
+    latent_size = get_model_latent_size(args)
+    latent_channels = get_model_latent_channels(args)
     args.model.latent_size = latent_size
     model = get_models(args).to(device)
     
@@ -59,7 +65,12 @@ def main(args):
     model.eval()
     
     print("Loading VAE...")
-    vae = AutoencoderKL.from_pretrained(args.vae_model_path, subfolder="vae").to(device)
+    codec_cfg = resolve_latent_codec_config(args)
+    if not codec_cfg.has_decoder:
+        raise NotImplementedError(
+            f"rollout.py requires a decoder, but latent_codec.kind={codec_cfg.kind} is encoder-only"
+        )
+    vae = load_autoencoder_kl(codec_cfg.model_path).to(device)
     vae.eval()
     vae_precision = getattr(args.experiment.infra, "vae_precision", "fp32")
     
@@ -192,7 +203,7 @@ def main(args):
             if args.model.use_action:
                 model_kwargs["action"] = window_actions
             
-            shape = (current_batch_size, num_frames_per_inference, 4, latent_size, latent_size)
+            shape = (current_batch_size, num_frames_per_inference, latent_channels, latent_size, latent_size)
             pred_latents = dfot_sample(
                 diffusion=diffusion,
                 model=model.forward,

@@ -8,6 +8,7 @@ import logging
 mainlogger = logging.getLogger('mainlogger')
 
 import torch
+import torch.nn.functional as F
 import torchvision
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import Callback
@@ -362,3 +363,51 @@ class MetricsLogger(Callback):
             pl_module.train()
         return x_pred, x_reconst, x_gt
 
+
+class LatentMetricsLogger(Callback):
+    def __init__(self, log_every_n_train_steps=1000, log_latents_kwargs=None, evaluate=True):
+        super().__init__()
+        self.log_every_n_train_steps = log_every_n_train_steps
+        self.log_latents_kwargs = log_latents_kwargs if log_latents_kwargs else {}
+        self.evaluate = evaluate
+
+    def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx=None):
+        if not self.evaluate:
+            return
+
+        is_val_only = trainer.state.fn == "validate"
+        should_log = is_val_only or (trainer.global_step % self.log_every_n_train_steps == 0)
+        if not should_log and not trainer.sanity_checking:
+            return
+
+        was_training = pl_module.training
+        if was_training:
+            pl_module.eval()
+
+        with torch.no_grad():
+            logs = pl_module.log_latents(batch, split="val", **self.log_latents_kwargs)
+            z_pred = logs["samples"]
+            z_gt = logs["gt"]
+            n_context = logs["n_context"]
+
+            pred = z_pred[:, n_context:]
+            gt = z_gt[:, n_context:]
+            diff = pred.float() - gt.float()
+
+            mse = diff.square().mean()
+            mae = diff.abs().mean()
+            rmse = torch.sqrt(mse.clamp_min(0.0))
+            nmse = mse / gt.float().square().mean().clamp_min(1e-12)
+            pred_flat = pred.float().reshape(pred.shape[0], -1)
+            gt_flat = gt.float().reshape(gt.shape[0], -1)
+            cosine_distance = 1.0 - F.cosine_similarity(pred_flat, gt_flat, dim=1).mean()
+
+            batch_size = pred.shape[0]
+            pl_module.log("val_eval/latent_mse", mse, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True, batch_size=batch_size)
+            pl_module.log("val_eval/latent_nmse", nmse, on_step=False, on_epoch=True, prog_bar=False, logger=True, sync_dist=True, batch_size=batch_size)
+            pl_module.log("val_eval/latent_mae", mae, on_step=False, on_epoch=True, prog_bar=False, logger=True, sync_dist=True, batch_size=batch_size)
+            pl_module.log("val_eval/latent_rmse", rmse, on_step=False, on_epoch=True, prog_bar=False, logger=True, sync_dist=True, batch_size=batch_size)
+            pl_module.log("val_eval/latent_cosine_distance", cosine_distance, on_step=False, on_epoch=True, prog_bar=False, logger=True, sync_dist=True, batch_size=batch_size)
+
+        if was_training:
+            pl_module.train()

@@ -74,3 +74,4 @@ outputs/
 multirun/
 *.log
 pretrained_models/
+wandb/

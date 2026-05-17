@@ -2,6 +2,7 @@ import os
 import sys
 sys.path.append(os.path.split(sys.path[0])[0])
 
+from latent_codecs import get_model_latent_channels, get_model_latent_size
 from .nanowm import NanoWM_models
 
 from torch.optim.lr_scheduler import LambdaLR
@@ -29,15 +30,17 @@ def get_lr_scheduler(optimizer, name, **kwargs):
 def get_models(args):
     """Build the world-model backbone from the fully resolved config.
 
-    All model knobs are required in the config — no silent fallbacks. If a
-    field is missing, Hydra / OmegaConf raises; we do not patch over it here.
+    Legacy run configs did not record `model.latent_channels`; defaulting it to
+    4 keeps existing SD-VAE checkpoints loadable while new codecs can make the
+    channel count explicit.
     """
     if 'NanoWM' not in args.model.arch:
         raise ValueError(f"{args.model.arch} Model Not Supported!")
 
     action_dim = args.dataset.spec.action_dim * args.dataset.frame_interval
     return NanoWM_models[args.model.arch](
-        input_size=args.model.latent_size,
+        input_size=get_model_latent_size(args),
+        in_channels=get_model_latent_channels(args),
         num_classes=args.model.num_classes,
         num_frames=args.model.num_frames,
         extras=args.model.extras,
@@ -46,4 +49,3 @@ def get_models(args):
         action_injection_type=args.model.action_injection.type,
         causal=args.model.causal,
     )
-    

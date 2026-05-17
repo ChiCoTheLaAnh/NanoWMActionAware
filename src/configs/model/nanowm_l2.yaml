@@ -10,5 +10,6 @@ action_injection:
 causal: true  # temporal self-attn and cross-attn use causal mask (frame t attends only to <= t)
 image_size: 256
 latent_size: 32
+latent_channels: 4
 extras: 1
 num_classes: 1000  # only consulted when extras==2 (class-conditional path); kept explicit for config-as-source-of-truth.
