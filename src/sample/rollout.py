@@ -170,7 +170,7 @@ def main(args):
 
             # Normalize actions if the dataset was configured to do so
             if dataset.normalize_action:
-                raw_actions = (raw_actions - dataset.action_mean) / dataset.action_std
+                raw_actions = (raw_actions - dataset._raw_action_mean) / dataset._raw_action_std
 
             batch_visual_list.append(visual_frames)
             batch_raw_actions_list.append(raw_actions)

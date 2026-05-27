@@ -211,6 +211,9 @@ class DinoWorldModelDataSource(DataSource):
 
         return frames
 
+    def get_seq_length(self, index: int) -> int:
+        return int(self.seq_lengths[index].item())
+
     def get_num_trajectories(self) -> int:
         return self.num_trajectories
 
