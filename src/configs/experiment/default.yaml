@@ -33,6 +33,7 @@ training:
       filename: "latest-{epoch}-{step}"
 
 evaluation:
+  batch_size: null  # null falls back to training.batch_size
   validation_size: 32
   save_videos: true
   scheduling_mode: null

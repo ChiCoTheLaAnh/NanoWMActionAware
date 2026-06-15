@@ -769,8 +769,9 @@ class TrainExperiment(BaseExperiment):
 
     def _make_val_loader(self):
         args = self.cfg
+        eval_batch_size = args.experiment.evaluation.get("batch_size", None)
         return dict(
-            batch_size=args.experiment.training.batch_size,
+            batch_size=eval_batch_size or args.experiment.training.batch_size,
             shuffle=False,
             num_workers=args.experiment.infra.num_workers,
             pin_memory=True,
