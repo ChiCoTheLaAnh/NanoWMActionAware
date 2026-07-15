@@ -1,0 +1,99 @@
+{
+  "action_names": [
+    "left",
+    "right",
+    "shoot"
+  ],
+  "base_seed": 42,
+  "collector": "src/scripts/collect_vizdoom.py",
+  "episodes": 10,
+  "files": [
+    {
+      "file": "episode_00000.hdf5",
+      "length": 30,
+      "return": -46.0,
+      "seed": 42,
+      "sha256": "0734175e71bb2e343065ac427b2c68a0db955cfacc89f7247dc4cfc7076db42e",
+      "success": true
+    },
+    {
+      "file": "episode_00001.hdf5",
+      "length": 12,
+      "return": 48.0,
+      "seed": 43,
+      "sha256": "06f089d82f9c8cc9f437cc15f1cfac60a109d15aa4d05dbff53272a382c71f28",
+      "success": true
+    },
+    {
+      "file": "episode_00002.hdf5",
+      "length": 40,
+      "return": -92.0,
+      "seed": 44,
+      "sha256": "266dfcdf5c0e657def4ded34a723bfded4410dd33759f2c7b8e935d0e062a5ab",
+      "success": true
+    },
+    {
+      "file": "episode_00003.hdf5",
+      "length": 7,
+      "return": 70.0,
+      "seed": 45,
+      "sha256": "d14e17407fad6043953a2f3726362344dcf67fcc30a231e531231920be558a26",
+      "success": true
+    },
+    {
+      "file": "episode_00004.hdf5",
+      "length": 3,
+      "return": 91.0,
+      "seed": 46,
+      "sha256": "1c94c398eb64dc972255efced49a6574f764c605afad586d0d91b3c8a04c12cc",
+      "success": true
+    },
+    {
+      "file": "episode_00005.hdf5",
+      "length": 75,
+      "return": -360.0,
+      "seed": 47,
+      "sha256": "f4793be348e985844df451a00af1300660882ff675da37595be950f6e2e76eec",
+      "success": false
+    },
+    {
+      "file": "episode_00006.hdf5",
+      "length": 75,
+      "return": -365.0,
+      "seed": 48,
+      "sha256": "4d26475b92e1f1bedc868916b8c4498408d82dce8fa750f21e42c1da684ce187",
+      "success": false
+    },
+    {
+      "file": "episode_00007.hdf5",
+      "length": 23,
+      "return": -4.0,
+      "seed": 49,
+      "sha256": "ab684026c6c4cd0481b596a3c6026addeef1edddf778b8772d41cdda3a23f660",
+      "success": true
+    },
+    {
+      "file": "episode_00008.hdf5",
+      "length": 33,
+      "return": -61.0,
+      "seed": 50,
+      "sha256": "f2d89d8bcf50111e998b7a3ba213ce80c6eda18ed02fc836c214f9d713bddff0",
+      "success": true
+    },
+    {
+      "file": "episode_00009.hdf5",
+      "length": 10,
+      "return": 58.0,
+      "seed": 51,
+      "sha256": "6f85c758085a81020d8c4154ee8759cf6e759861be6bd43e08bcc9fdc8050863",
+      "success": true
+    }
+  ],
+  "frame_skip": 4,
+  "nanowm_revision": "4cc473879bd99db5d839bc508a7035a6f882f541",
+  "policy": "uniform",
+  "resolution": "160x120",
+  "schema_version": 1,
+  "upstream_revision": "2ee3c355a6e44d2254eba8a8c29f199adddf4a3e",
+  "vizdoom_version": "1.3.0"
+}

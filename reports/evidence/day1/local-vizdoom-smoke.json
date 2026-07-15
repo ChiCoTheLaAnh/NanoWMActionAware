@@ -1,0 +1,19 @@
+{
+  "colab_smoke": "not run",
+  "h5py": "3.10.0",
+  "imageio": "2.33.1",
+  "imageio_ffmpeg": "0.6.0",
+  "nanowm_revision": "4cc473879bd99db5d839bc508a7035a6f882f541",
+  "numpy": "1.26.4",
+  "pilot_episodes": 10,
+  "pilot_successes": 8,
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "python": "3.9.6",
+  "runtime": "local-macos-pilot-only",
+  "timestamp_utc": "2026-07-15T04:09:00Z",
+  "unit_tests": "5 passed",
+  "upstream_revision": "2ee3c355a6e44d2254eba8a8c29f199adddf4a3e",
+  "video_sha256": "c02fc166ee30d304ab6a1f38be5ba76a4d90b14a2749f29f4513fc521ca7a282",
+  "vizdoom": "1.3.0",
+  "vizdoom_replay_test": "passed"
+}
