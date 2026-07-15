@@ -1,176 +1,96 @@
-<div align="center">
-<h1>🌍 Nano World Model</h1>
-</div>
+# Action-Aware NanoWM
 
-<div align="center">
-<a href='https://arxiv.org/abs/2605.23993'><img src='https://img.shields.io/badge/arXiv-2605.23993-b31b1b.svg'></a>
-<a href='https://huggingface.co/collections/knightnemo/nano-world-model'><img src='https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Page-blue'></a>
-<a href='https://simchowitzlabpublic.github.io/nano-world-model/'><img src='https://img.shields.io/badge/Project-Page-Green'></a>
-<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"/></a>
-</div>
+Preventing action-conditioning collapse in low-compute game world models.
 
-A minimalist repository for training video world models based on diffusion-forcing.
+## Overview
 
-<div align="center">
+Action-Aware NanoWM is a research project investigating whether a compact diffusion world model can be made genuinely responsive to its action input. A video predictor can generate plausible futures while effectively ignoring the action that is supposed to condition them; this project calls that failure mode **action-conditioning collapse**.
 
-![3×4 rollout grid](assets/grid_video.gif)
+The project adapts NanoWM-S/2 to VizDoom Basic and adds an inverse-dynamics regularizer. The auxiliary head must infer the action from the predicted transition—without seeing the action embedding directly—so the generated future is encouraged to preserve action-specific information.
 
-</div>
+The core research question is:
 
-## News and Updates
-- 🚩 **2026-05:** We release [📕 Technical Report](https://arxiv.org/abs/2605.23993) on arxiv, check it out!
+> Can an auxiliary inverse-dynamics objective make a small diffusion world model genuinely respond to actions while preserving video quality and improving planning?
 
-- 🚩 **2026-05:** We release all model checkpoints on [🤗 huggingface](https://huggingface.co/collections/knightnemo/nano-world-model).
+This repository builds on the [official Nano World Model project](https://github.com/simchowitzlabpublic/nano-world-model). It is a low-compute reproducibility study, not a claim of state-of-the-art game-playing performance.
 
-- 🚩 **2026-05:** We release code for training, inference and evaluation.
+## Project Status
 
-## Key Features
+**Status:** Planning and kickoff
 
-- 🚀 **Instant Start** — Minimal dependencies, easy data loading. From clone to first rollout in minutes.
-- 🛠️ **Unified Pipeline** — Training, Validation, Evaluation; All managed with clean hydra-based configuration systems.
-- 🔬 **Scientific Transparency** — Clean codebase with head-to-head ablations across prediction target, action injection, and model scale; Fully open-source, including model checkpoints.
-- 🤖 **Diverse Applications** — Long-horizon rollouts, rollout to 3d point clouds, planning (MPC) out of the box.
+The research plan and progress-tracking structure are in place. The upstream NanoWM code, runtime environment, VizDoom dataset, trained models, and evaluation results have not yet been integrated or produced.
 
-## 🚀 Quick Start
+- Detailed design: [Project Plan](docs/PROJECT_PLAN.md)
+- Current work and evidence: [Progress Tracker](PROGRESS.md)
 
-```bash
-git clone https://github.com/simchowitzlabpublic/nano-world-model.git
-cd nano-world-model
-conda env create -f environment.yml && conda activate nanowm
-```
+## Fixed Scope
 
-LeRobot dataset loading is provided by `lerobot==0.3.3` in `environment.yml`.
-Do not install `lerobot-datasets`; it is a dataset format version, not a PyPI package.
+| Area | Decision |
+| --- | --- |
+| Primary environment | VizDoom Basic |
+| Stretch environment | VizDoom Take Cover |
+| World model | NanoWM-S/2, approximately 40M parameters |
+| Latent representation | Frozen Stable Diffusion VAE |
+| Input | 1 context frame + 3 future frames at 256 × 256 |
+| Actions | Move left, move right, shoot |
+| Baseline conditioning | Additive action injection |
+| Proposed objective | Diffusion loss + inverse-dynamics loss |
+| Compute target | One Colab GPU or one personal GPU |
+| Planned duration | 8 weeks |
 
-Set data + results paths (or use the gitignored `src/configs/local/paths.yaml` template — see [docs/config_system.md](docs/config_system.md#path-configuration)):
+The proposed training objective is:
 
-```bash
-export DATASET_DIR=/path/to/dino_wm_data       # DINO-WM envs (point_maze, pusht, ...)
-export CSGO_DATA_DIR=/path/to/csgo             # CSGO HDF5 files
-export RT1_DATA_ROOT=/path/to/rt1_fractal      # RT-1 LeRobot mirror (optional)
-export RESULTS_DIR=/path/to/results            # checkpoints + logs land here
-```
+$$
+\mathcal{L}_{\text{total}}
+= \mathcal{L}_{\text{diffusion}}
++ \lambda_{\text{action}}\mathcal{L}_{\text{inverse}}.
+$$
 
-Download the i3d torchscript used by FID/FVD evaluation:
+The inverse-dynamics head receives the context latent, predicted next latent, and their difference. It must never receive the action embedding directly.
 
-```bash
-mkdir -p pretrained_models/i3d && curl -L \
-    "https://www.dropbox.com/scl/fi/c5nfs6c422nlpj880jbmh/i3d_torchscript.pt?rlkey=x5xcjsrz0818i4qxyoglp5bb8&dl=1" \
-    -o pretrained_models/i3d/i3d_torchscript.pt
-```
+## Planned Outputs
 
-For dataset downloads (DINO-WM, RT-1, CSGO), see [docs/datasets/README.md](docs/datasets/README.md).
+- An action-aligned VizDoom dataset with seed-based train, validation, and test splits.
+- A standard additive-action NanoWM-S baseline.
+- An action-aware NanoWM variant with inverse-dynamics regularization.
+- A counterfactual benchmark branching the same state into left, right, and shoot futures.
+- Action Use Gap, counterfactual consistency, visual-fidelity, and long-horizon evaluations.
+- A discrete model-predictive-control planner and frozen reward scorer.
+- A branching-future demo, Colab notebook, checkpoints, results, and technical report.
 
-## 🥷 Train your first model
+## Success Criteria
 
-DINO-WM PushT, NanoWM-B/2, default settings (pred-v · additive injection · cosine + ZTSNR):
+The minimum credible result requires a reproducible dataset and DataSource, trained standard and action-aware models, a larger Action Use Gap for the proposed model, no more than 10% LPIPS degradation, a counterfactual branch demo, and either a planning experiment or a rigorous planning failure analysis.
 
-```bash
-python src/main.py experiment=dino_wm_pusht dataset=dino_wm/pusht model=nanowm_b2
-```
+Target outcomes include:
 
-CSGO with the L/2 model:
+- At least 60% inverse-action accuracy.
+- A positive Action Use Gap whose confidence interval excludes zero.
+- At least 20% relative improvement in counterfactual consistency.
+- At least 10 percentage points of planning-success improvement over the standard NanoWM planner.
 
-```bash
-python src/main.py experiment=csgo dataset=game/csgo model=nanowm_l2_csgo
-```
+## Roadmap
 
-RT-1 (fractal) main run:
+| Week | Milestone |
+| --- | --- |
+| 1 | Environment, pilot data, and VizDoom DataSource |
+| 2 | Pipeline smoke tests and development baseline |
+| 3 | Full dataset and standard NanoWM baseline |
+| 4 | Inverse-dynamics head and lambda sweep |
+| 5 | Final multi-seed comparison |
+| 6 | Counterfactual benchmark |
+| 7 | Discrete model-predictive planning |
+| 8 | Demo, reproducibility release, and report |
 
-```bash
-python src/main.py experiment=rt1 dataset=rt1/rt1 model=nanowm_b2
-```
+Milestone completion, exit gates, artifacts, experiment runs, and blockers are tracked only in [PROGRESS.md](PROGRESS.md).
 
-For reproducibility, we provide example scripts in `src/scripts/`. See [docs/training.md](docs/training.md) for the full training guide, design choices, and ablation tables.
+## Installation
 
-## 📦 Pretrained Checkpoints
+Installation instructions are pending integration of the official NanoWM codebase and validation of a pinned environment. Until that work is complete, commands from upstream should not be treated as tested instructions for this repository.
 
-Best-config runs (pred-v · additive · cosine + ZTSNR · NanoWM-B/2 unless noted):
+## Reproduction
 
-<div align="center">
+Reproduction commands, dataset manifests, checkpoint locations, resolved configurations, and expected metric outputs will be added only after their corresponding pipeline stages pass the documented exit gates.
 
-| Domain | Checkpoint | Steps |
-|:-------|:-----------|:------|
-| DINO-WM Point Maze | 🤗 [nanowm-b2-dino-wm-point-maze-30k](https://huggingface.co/knightnemo/nanowm-b2-dino-wm-point-maze-30k) | 30k |
-| DINO-WM Wall | 🤗 [nanowm-b2-dino-wm-wall-15k](https://huggingface.co/knightnemo/nanowm-b2-dino-wm-wall-15k) | 15k |
-| DINO-WM Rope | 🤗 [nanowm-b2-dino-wm-rope-15k](https://huggingface.co/knightnemo/nanowm-b2-dino-wm-rope-15k) | 15k |
-| DINO-WM Granular | 🤗 [nanowm-b2-dino-wm-granular-15k](https://huggingface.co/knightnemo/nanowm-b2-dino-wm-granular-15k) | 15k |
-| DINO-WM PushT | 🤗 [nanowm-b2-dino-wm-pusht-100k](https://huggingface.co/knightnemo/nanowm-b2-dino-wm-pusht-100k) | 100k |
-| RT-1 (fractal) | 🤗 [nanowm-b2-rt1-300k](https://huggingface.co/knightnemo/nanowm-b2-rt1-300k) | 300k |
-| CSGO | 🤗 [nanowm-l2-csgo-100k](https://huggingface.co/knightnemo/nanowm-l2-csgo-100k) (NanoWM-L/2) | 100k |
+Do not collect the full dataset or begin long training runs until frame/action alignment, storage, loading, and the four-frame DataLoader batch have been verified.
 
-</div>
-
-We also provide RT-1 ablation tables with HF checkpoint paths. See [docs/training.md#design-choices](docs/training.md#design-choices) for the full table and ablation numbers.
-
-## 🎬 Sample Predictions
-
-CSGO 50-frame auto-regressive long-rollouts (NanoWM-L/2, 100k):
-
-<div align="center">
-
-![CSGO 50-frame autoregressive long rollout](assets/csgo_100k_long_rollout.gif)
-
-</div>
-
-Quantitative Metrics
-Evaluated on 256 fixed samples (seed=42), 250 DDIM steps, sequential scheduling (frame-by-frame autoregressive denoising).
-
-<div align="center">
-
-| Dataset | Steps | PSNR ↑ | SSIM ↑ | LPIPS ↓ | FID ↓ |
-|:--------|:------|:-------|:-------|:--------|:------|
-| Point Maze | 30k | 36.74 | 0.984 | 0.019 | 9.66 |
-| Wall | 15k | 34.05 | 0.994 | 0.010 | 2.64 |
-| PushT | 100k | 33.19 | 0.982 | 0.016 | 13.63 |
-| Rope | 15k | 31.63 | 0.953 | 0.056 | 35.20 |
-| Granular | 15k | 26.08 | 0.917 | 0.073 | 40.05 |
-| RT-1 | 300k | 24.36 | 0.787 | 0.180 | 35.08 |
-
-</div>
-
-Full per-domain numbers and methodology in [docs/evaluation.md](docs/evaluation.md).
-
-## 🧭 Applications
-
-NanoWM rollouts can be used directly for downstream applications, including long-horizon generation, video-to-3D reconstruction, and MPC-style planning.
-
-<div align="center">
-
-![Video-to-3D point cloud demo](assets/video_to_3d.gif)
-
-</div>
-
-- **[Long-horizon rollout](docs/applications/long_rollout.md)** — autoregressive rollout from trained checkpoints
-- **[Video → 3D map](docs/applications/video_to_3d.md)** — Depth Anything 3 point cloud reconstruction from rollout videos
-- **[MPC-style planning](docs/applications/planning.md)** — CEM planning over world model rollouts
-
-## 📚 Documentation
-
-- **[docs/config_system.md](docs/config_system.md)** — Hydra config layout, overrides, environment variables
-- **[docs/training.md](docs/training.md)** — training workflow, design choices, ablation tables, all checkpoints
-- **[docs/evaluation.md](docs/evaluation.md)** — evaluation workflow, metric definitions, full result tables
-- **[docs/datasets/README.md](docs/datasets/README.md)** — DINO-WM / RT-1 / CSGO formats, downloads, splits
-- **[docs/applications/planning.md](docs/applications/planning.md)** — MPC + CEM model-predictive control
-- **[docs/applications/long_rollout.md](docs/applications/long_rollout.md)** — long-horizon autoregressive rollout
-- **[docs/applications/video_to_3d.md](docs/applications/video_to_3d.md)** — Depth Anything 3 point cloud pipeline
-
-## 🙏 Acknowledgements
-
-We build upon a number of existing codebases: [Latte](https://github.com/Vchitect/Latte), [Vid2World](https://github.com/thuml/Vid2World), [DFoT](https://github.com/kwsong0113/diffusion-forcing-transformer), and [DINO-WM](https://github.com/gaoyuezhou/dino_wm). More broadly, this repository draws inspirations and design principles from [NanoGPT](https://github.com/karpathy/nanoGPT), [NanoChat](https://github.com/karpathy/nanochat), and [Boyuan Chen's Research Template](https://github.com/buoyancy99/research-template). We sincerely thank the codebases above for open-sourcing their works.
-
-## 📝 Citation
-
-If you find this repository useful in your research, please consider citing:
-
-```bibtex
-@misc{huang2026nanoworldmodels,
-  title={Nano World Models: A Minimalist Implementation of Future Video Prediction},
-  author={Siqiao Huang and Partha Kaushik and Michael Chen and Hengkai Pan and Omar Chehab and Fernando Moreno-Pino and Max Simchowitz},
-  year={2026},
-  eprint={2605.23993},
-  archivePrefix={arXiv},
-  primaryClass={cs.CV},
-  url={https://arxiv.org/abs/2605.23993},
-}
-```
