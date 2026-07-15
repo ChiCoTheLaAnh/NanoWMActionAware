@@ -6,21 +6,21 @@ This file is the only source of truth for execution status. The [project plan](d
 
 | Field | Value |
 | --- | --- |
-| Last updated | 2026-07-14 |
-| Overall status | Upstream and local VizDoom pilot complete; Colab smoke pending |
-| Current phase | Week 0 — repository bootstrap |
-| Active milestone | Validate Day 1 notebook in a fresh Colab GPU runtime |
+| Last updated | 2026-07-15 |
+| Overall status | Day 1 exit gate passed; Day 2 alignment and loading are next |
+| Current phase | Week 1 — environment and data |
+| Active milestone | Day 2 — alignment and data loading |
 | Blocked | No |
 
 Legend: `[ ]` not started · `[x]` complete. Add an evidence link before checking an engineering or experimental task.
 
 ## Next Up
 
-1. Run `notebooks/01_colab_day1.ipynb` from a fresh Colab GPU runtime.
-2. Confirm the NanoWM import/Hydra smoke test without downloading a VAE or starting training.
-3. Review the generated `pip-freeze.txt` and pin the dependency set that actually passed.
-4. Commit the Colab smoke report, then mark the remaining Day 1 environment tasks complete.
-5. Begin Day 2 alignment validation and `VizDoomDataSource` only after that gate passes.
+1. Validate the HDF5 schema across all 10 pilot episodes.
+2. Plot three pilot episodes and inspect the action distribution.
+3. Verify explicitly that action $a_t$ maps observation $o_t$ to $o_{t+1}$.
+4. Implement and register `VizDoomDataSource` using the validated alignment.
+5. Load and save evidence for one batch with one context frame and three future frames.
 
 Do not collect the full dataset until frame/action alignment and a four-frame DataLoader batch pass their exit gates.
 
@@ -38,9 +38,9 @@ Evidence: [README](README.md) · [Project plan](docs/PROJECT_PLAN.md) · [Progre
 ### Day 1 — Environment and Initial Collection
 
 - [x] Integrate/fork the official NanoWM codebase and configure the upstream remote.
-- [ ] Create the Colab or personal-GPU environment from the upstream environment definition.
-- [ ] Pin the verified dependencies.
-- [ ] Pass configuration and import smoke tests.
+- [x] Create the Colab or personal-GPU environment from the upstream environment definition.
+- [x] Pin the verified dependencies.
+- [x] Pass configuration and import smoke tests.
 - [x] Install VizDoom in an isolated local pilot environment.
 - [x] Launch VizDoom Basic and verify deterministic seed replay.
 - [x] Collect 10 pilot episodes with seeds 42–51.
@@ -50,9 +50,9 @@ Evidence: [README](README.md) · [Project plan](docs/PROJECT_PLAN.md) · [Progre
 
 **Expected artifacts:** pinned environment definition, smoke-test log, raw pilot episodes, and rendered episode video.
 
-**Current evidence:** upstream `2ee3c35` · [local smoke report](reports/evidence/day1/local-vizdoom-smoke.json) · [pilot manifest](reports/evidence/day1/pilot-manifest.json) · [pilot video](reports/evidence/day1/pilot_episode_00000.mp4)
+**Current evidence:** upstream `2ee3c35` · [Colab smoke report](reports/evidence/day1/smoke-report.json) · [pip freeze](reports/evidence/day1/pip-freeze.txt) · [pilot manifest](reports/evidence/day1/pilot-manifest.json) · [pilot video](reports/evidence/day1/pilot_episode_00000.mp4)
 
-**Gate state:** partial. VizDoom collection passed locally; fresh Colab dependency and NanoWM configuration smoke tests remain open.
+**Gate state:** passed on a fresh Colab T4 runtime. The configuration smoke test passed at project revision `23fb917`; 10 episodes with seeds 42–51 and one 30-frame video were produced. The upstream SHA is recorded in the Colab smoke report because the Colab clone did not configure an `upstream` remote.
 
 ### Day 2 — Alignment and Data Loading
 
@@ -84,7 +84,7 @@ Evidence: [README](README.md) · [Project plan](docs/PROJECT_PLAN.md) · [Progre
 
 ### Week 1 — Environment and Data
 
-- [ ] Complete all Day 1 tasks.
+- [x] Complete all Day 1 tasks.
 - [ ] Collect 100 pilot episodes only after the first 10 validate correctly.
 - [ ] Implement the HDF5 episode format.
 - [ ] Visualize frame sequences and action distributions.
@@ -223,7 +223,7 @@ Use identical model size, VAE, data splits, training steps, optimizer, learning 
 
 ## Blockers
 
-No active blocker. Upstream integration and environment validation are the next unstarted tasks.
+No active blocker. Day 2 schema, alignment, visualization, and DataSource work has not started.
 
 When adding a blocker, record its date, affected milestone, owner, attempted mitigations, and the condition required to clear it.
 
@@ -239,6 +239,7 @@ When adding a blocker, record its date, affected milestone, owner, attempted mit
 | Weak reward scorer | Poor validation performance on real latents | Validate and freeze the scorer before planner evaluation | Not assessed |
 | Slow planning | One action requires several minutes | Use 10 DDIM steps, chunking, and horizon-four enumeration | Not assessed |
 | Runtime interruption | Training progress is lost | Checkpoint every 1,000–2,000 steps and test resume early | Not assessed |
+| Colab package drift | Binary ABI or dependency-check failure after a runtime update | Preserve Colab-owned binary packages, pin only missing project packages, and capture `pip freeze` | Mitigated for Day 1; monitor |
 
 ## Decisions
 
@@ -252,6 +253,8 @@ When adding a blocker, record its date, affected milestone, owner, attempted mit
 | 2026-07-14 | Rebase project documentation onto NanoWM upstream `2ee3c35` | Preserves upstream lineage and future synchronization |
 | 2026-07-14 | Put project scripts under upstream-native `src/scripts/` | Keeps additions consistent with the integrated codebase |
 | 2026-07-14 | Keep Day 1 partially open until a fresh Colab smoke run passes | Local VizDoom evidence does not validate the GPU training runtime |
+| 2026-07-15 | Preserve Colab's binary and platform package stack | Downgrading NumPy and h5py caused an ABI mismatch in the Python 3.12 runtime |
+| 2026-07-15 | Accept the fresh T4 smoke run as the Day 1 environment baseline | Hydra composition, strict dependency checking, deterministic collection, and evidence generation passed without model download or training |
 
 ## Evidence Index
 
@@ -260,11 +263,12 @@ When adding a blocker, record its date, affected milestone, owner, attempted mit
 | Project README | [README.md](README.md) | Complete |
 | Detailed research plan | [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) | Complete |
 | Progress tracker | [PROGRESS.md](PROGRESS.md) | Complete |
-| Colab notebook | [notebooks/01_colab_day1.ipynb](notebooks/01_colab_day1.ipynb) | Prepared; not run in Colab |
+| Colab notebook | [notebooks/01_colab_day1.ipynb](notebooks/01_colab_day1.ipynb) | Validated on a fresh Colab T4 runtime |
 | Local VizDoom smoke report | [reports/evidence/day1/local-vizdoom-smoke.json](reports/evidence/day1/local-vizdoom-smoke.json) | Complete |
 | Pilot manifest | [reports/evidence/day1/pilot-manifest.json](reports/evidence/day1/pilot-manifest.json) | Complete |
 | Pilot episode video | [reports/evidence/day1/pilot_episode_00000.mp4](reports/evidence/day1/pilot_episode_00000.mp4) | Complete |
-| Colab environment smoke-test log | — | Not produced |
+| Colab environment smoke-test report | [reports/evidence/day1/smoke-report.json](reports/evidence/day1/smoke-report.json) | Complete |
+| Colab dependency freeze | [reports/evidence/day1/pip-freeze.txt](reports/evidence/day1/pip-freeze.txt) | Complete |
 | Dataset validation report | — | Not produced |
 | Baseline checkpoint | — | Not produced |
 | Action-aware checkpoint | — | Not produced |

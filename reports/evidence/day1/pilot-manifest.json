@@ -13,7 +13,7 @@
       "length": 30,
       "return": -46.0,
       "seed": 42,
-      "sha256": "0734175e71bb2e343065ac427b2c68a0db955cfacc89f7247dc4cfc7076db42e",
+      "sha256": "62f3e4fba11eefd264bd71cc4cbe667910a63541cf841ab149aa77688199f520",
       "success": true
     },
     {
@@ -21,7 +21,7 @@
       "length": 12,
       "return": 48.0,
       "seed": 43,
-      "sha256": "06f089d82f9c8cc9f437cc15f1cfac60a109d15aa4d05dbff53272a382c71f28",
+      "sha256": "b9f103cf4b42ea46822925f17d78d451c58d0f7da01b309ad74d91e7c65429f1",
       "success": true
     },
     {
@@ -29,7 +29,7 @@
       "length": 40,
       "return": -92.0,
       "seed": 44,
-      "sha256": "266dfcdf5c0e657def4ded34a723bfded4410dd33759f2c7b8e935d0e062a5ab",
+      "sha256": "a2d82beb385b5676853f8b89722cfb92231a2028b74c498306ae17c4bf67b939",
       "success": true
     },
     {
@@ -37,7 +37,7 @@
       "length": 7,
       "return": 70.0,
       "seed": 45,
-      "sha256": "d14e17407fad6043953a2f3726362344dcf67fcc30a231e531231920be558a26",
+      "sha256": "66169d028c1a44a803d5f4162e8cef2efd92bfb45e1f2a94a0f811d6c3c03902",
       "success": true
     },
     {
@@ -45,7 +45,7 @@
       "length": 3,
       "return": 91.0,
       "seed": 46,
-      "sha256": "1c94c398eb64dc972255efced49a6574f764c605afad586d0d91b3c8a04c12cc",
+      "sha256": "707568a390c7b5159b304a1e654535a5e28121b244808e5d5698677d3155d4a6",
       "success": true
     },
     {
@@ -53,7 +53,7 @@
       "length": 75,
       "return": -360.0,
       "seed": 47,
-      "sha256": "f4793be348e985844df451a00af1300660882ff675da37595be950f6e2e76eec",
+      "sha256": "08b170112cdbf02f1c02aaa262d06b654955a5f301755d7cc85a9b8480388ef9",
       "success": false
     },
     {
@@ -61,7 +61,7 @@
       "length": 75,
       "return": -365.0,
       "seed": 48,
-      "sha256": "4d26475b92e1f1bedc868916b8c4498408d82dce8fa750f21e42c1da684ce187",
+      "sha256": "b95317f2f2f6011ca6c7edf0670cfa40848f04702c137d9768ddd8d41868083c",
       "success": false
     },
     {
@@ -69,7 +69,7 @@
       "length": 23,
       "return": -4.0,
       "seed": 49,
-      "sha256": "ab684026c6c4cd0481b596a3c6026addeef1edddf778b8772d41cdda3a23f660",
+      "sha256": "7e5f5a8114e04957bbc93b854d13464210fca50ae10d4db7240e77a25de2286e",
       "success": true
     },
     {
@@ -77,7 +77,7 @@
       "length": 33,
       "return": -61.0,
       "seed": 50,
-      "sha256": "f2d89d8bcf50111e998b7a3ba213ce80c6eda18ed02fc836c214f9d713bddff0",
+      "sha256": "7f8674a86b6ed3b96113b9725c3e9945ac053ce295bc15c2a8934c2c6961faa2",
       "success": true
     },
     {
@@ -85,15 +85,15 @@
       "length": 10,
       "return": 58.0,
       "seed": 51,
-      "sha256": "6f85c758085a81020d8c4154ee8759cf6e759861be6bd43e08bcc9fdc8050863",
+      "sha256": "2ad40741de955d29b83b3ec513f8bd134ed90a2cb80caef209a4cd2f8f4be95d",
       "success": true
     }
   ],
   "frame_skip": 4,
-  "nanowm_revision": "4cc473879bd99db5d839bc508a7035a6f882f541",
+  "nanowm_revision": "23fb9179fbb52e3eeb7101b210b8d71e8021c171",
   "policy": "uniform",
   "resolution": "160x120",
   "schema_version": 1,
-  "upstream_revision": "2ee3c355a6e44d2254eba8a8c29f199adddf4a3e",
+  "upstream_revision": "unknown",
   "vizdoom_version": "1.3.0"
 }

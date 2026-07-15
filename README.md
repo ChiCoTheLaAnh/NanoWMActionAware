@@ -16,13 +16,13 @@ This repository builds on the [official Nano World Model project](https://github
 
 ## Project Status
 
-**Status:** Day 1 bootstrap in progress
+**Status:** Day 1 complete; Day 2 alignment and data loading are next
 
 The official NanoWM source is integrated at upstream revision `2ee3c35`. The
 VizDoom collector and schema tests are implemented, and a deterministic
-10-episode pilot set plus video has been produced locally. The fresh Colab
-configuration/import smoke test is still pending; no model, checkpoint, or
-training result has been produced.
+10-episode pilot set plus video has been produced. A fresh Colab T4 runtime
+passed the dependency, import, and Hydra configuration smoke tests at project
+revision `23fb917`. No model, checkpoint, or training result has been produced.
 
 - Detailed design: [Project Plan](docs/PROJECT_PLAN.md)
 - Current work and evidence: [Progress Tracker](PROGRESS.md)
@@ -93,12 +93,15 @@ Milestone completion, exit gates, artifacts, experiment runs, and blockers are t
 The supported training runtime will be Google Colab. Open
 [`notebooks/01_colab_day1.ipynb`](notebooks/01_colab_day1.ipynb) in a GPU
 runtime to install the Day 1 dependencies without replacing Colab's
-CUDA-compatible PyTorch build, compose a NanoWM Hydra configuration, mount
-Google Drive, and collect the pilot data.
+CUDA-compatible PyTorch or binary scientific stack, compose a NanoWM Hydra
+configuration, mount Google Drive, and collect the pilot data.
 
-The notebook and [`requirements-colab.txt`](requirements-colab.txt) are
-prepared but have not yet passed a fresh Colab run. They must not be described
-as the final reproducible training environment until that smoke test succeeds.
+The notebook and [`requirements-colab.txt`](requirements-colab.txt) passed a
+fresh Colab run with Python 3.12.13, a Tesla T4, PyTorch 2.11.0+cu128, NumPy
+2.0.2, h5py 3.16.0, and VizDoom 1.3.0. See the tracked
+[smoke report](reports/evidence/day1/smoke-report.json) and
+[dependency freeze](reports/evidence/day1/pip-freeze.txt). This validates the
+Day 1 configuration and collection path only, not model training.
 
 The collector interface is:
 
@@ -115,9 +118,9 @@ python src/scripts/collect_vizdoom.py \
 
 Raw HDF5 episodes belong in Google Drive or another gitignored data directory.
 The tracked [pilot manifest](reports/evidence/day1/pilot-manifest.json),
-[local smoke report](reports/evidence/day1/local-vizdoom-smoke.json), and
-[pilot video](reports/evidence/day1/pilot_episode_00000.mp4) provide the
-current evidence.
+[Colab smoke report](reports/evidence/day1/smoke-report.json), and
+[pilot video](reports/evidence/day1/pilot_episode_00000.mp4) provide the Day 1
+evidence.
 
 ## Reproduction
 
