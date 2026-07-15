@@ -28,6 +28,8 @@ imageio-ffmpeg==0.6.0
 vizdoom==1.3.0
 
 # Upstream utilities imported by common NanoWM modules
+decord==0.6.0
+pytorch-fid==0.3.0
 scipy==1.11.4
 Pillow==10.1.0
 tqdm==4.66.1
