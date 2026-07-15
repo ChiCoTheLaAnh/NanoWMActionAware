@@ -16,9 +16,13 @@ This repository builds on the [official Nano World Model project](https://github
 
 ## Project Status
 
-**Status:** Planning and kickoff
+**Status:** Day 1 bootstrap in progress
 
-The research plan and progress-tracking structure are in place. The upstream NanoWM code, runtime environment, VizDoom dataset, trained models, and evaluation results have not yet been integrated or produced.
+The official NanoWM source is integrated at upstream revision `2ee3c35`. The
+VizDoom collector and schema tests are implemented, and a deterministic
+10-episode pilot set plus video has been produced locally. The fresh Colab
+configuration/import smoke test is still pending; no model, checkpoint, or
+training result has been produced.
 
 - Detailed design: [Project Plan](docs/PROJECT_PLAN.md)
 - Current work and evidence: [Progress Tracker](PROGRESS.md)
@@ -86,11 +90,39 @@ Milestone completion, exit gates, artifacts, experiment runs, and blockers are t
 
 ## Installation
 
-Installation instructions are pending integration of the official NanoWM codebase and validation of a pinned environment. Until that work is complete, commands from upstream should not be treated as tested instructions for this repository.
+The supported training runtime will be Google Colab. Open
+[`notebooks/01_colab_day1.ipynb`](notebooks/01_colab_day1.ipynb) in a GPU
+runtime to install the Day 1 dependencies without replacing Colab's
+CUDA-compatible PyTorch build, compose a NanoWM Hydra configuration, mount
+Google Drive, and collect the pilot data.
+
+The notebook and [`requirements-colab.txt`](requirements-colab.txt) are
+prepared but have not yet passed a fresh Colab run. They must not be described
+as the final reproducible training environment until that smoke test succeeds.
+
+The collector interface is:
+
+```bash
+python src/scripts/collect_vizdoom.py \
+  --output-dir "$VIZDOOM_DATA_DIR/pilot" \
+  --episodes 10 \
+  --base-seed 42 \
+  --policy uniform \
+  --frame-skip 4 \
+  --resolution 160x120 \
+  --video-out reports/evidence/day1/pilot_episode_00000.mp4
+```
+
+Raw HDF5 episodes belong in Google Drive or another gitignored data directory.
+The tracked [pilot manifest](reports/evidence/day1/pilot-manifest.json),
+[local smoke report](reports/evidence/day1/local-vizdoom-smoke.json), and
+[pilot video](reports/evidence/day1/pilot_episode_00000.mp4) provide the
+current evidence.
 
 ## Reproduction
 
-Reproduction commands, dataset manifests, checkpoint locations, resolved configurations, and expected metric outputs will be added only after their corresponding pipeline stages pass the documented exit gates.
+Model reproduction commands, checkpoint locations, resolved training
+configurations, and expected metric outputs will be added only after their
+corresponding pipeline stages pass the documented exit gates.
 
 Do not collect the full dataset or begin long training runs until frame/action alignment, storage, loading, and the four-frame DataLoader batch have been verified.
-

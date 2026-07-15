@@ -75,3 +75,11 @@ multirun/
 *.log
 pretrained_models/
 wandb/
+
+# Action-Aware NanoWM local data and Day 1 runtime artifacts
+data/
+*.hdf5
+*.h5
+day1.venv/
+reports/evidence/day1/pilot-data/
+_vizdoom.ini

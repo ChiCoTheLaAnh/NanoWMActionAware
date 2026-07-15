@@ -293,7 +293,7 @@ src/
     discrete_mpc.py
     goal_scorer.py
 
-scripts/
+src/scripts/
   collect_vizdoom.py
   validate_dataset.py
   build_counterfactual_set.py
