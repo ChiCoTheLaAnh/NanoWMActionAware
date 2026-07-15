@@ -9,6 +9,9 @@
 
 # Packages missing from the Colab runtime that NanoWM imports during the
 # Day 1 configuration smoke test.
+# Colab's IPython declares Jedi but does not currently preinstall it; include
+# the Python 3.12-compatible release so `pip check` can remain a strict gate.
+jedi==0.19.2
 hydra-core==1.3.2
 pytorch-lightning==1.9.5
 torchmetrics==1.2.0
