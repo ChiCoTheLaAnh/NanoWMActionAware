@@ -1,0 +1,40 @@
+defaults:
+  - default
+
+name: vizdoom_dev
+
+training:
+  max_steps: 10000
+  batch_size: 1
+  overfit_batches: 0.0
+  gradient_accumulation: 8
+  log_every: 50
+  val_every_n_steps: 500
+  checkpointing:
+    across_timesteps:
+      every_n_train_steps: 2000
+      save_top_k: -1
+      save_on_train_epoch_end: false
+      save_weights_only: false
+      filename: "vizdoom-dev-{epoch}-{step}"
+    latest:
+      every_n_train_steps: 500
+      save_top_k: 1
+      save_on_train_epoch_end: false
+      save_weights_only: false
+      filename: "latest-vizdoom-dev-{epoch}-{step}"
+
+evaluation:
+  batch_size: 1
+  validation_size: 32
+  save_videos: true
+  scheduling_mode: full_sequence
+  num_sampling_steps: 10
+  metrics:
+    log_every_n_train_steps: 1000
+    buffer_size: 32
+    max_batchsize: 1
+
+infra:
+  num_workers: 2
+  compile: false

@@ -62,6 +62,25 @@ python src/sample/plot_metrics.py \
     --output rollout_comparison.png
 ```
 
+### VizDoom action-use baselines
+
+After training `experiment=vizdoom_dev`, evaluate the same fixed validation
+clips under copy-last, correct, zero, and shuffled actions:
+
+```bash
+python src/evaluation/vizdoom_baselines.py \
+  --config <run>/config.yaml \
+  --checkpoint <run>/checkpoints/latest/<checkpoint>.ckpt \
+  --subset-manifest reports/evidence/week2/fixed-validation-clips.json \
+  --output-dir reports/evidence/week2/baselines \
+  --require-copy-last-win
+```
+
+The report contains one- and three-step MSE, PSNR, SSIM, LPIPS, a preliminary
+shuffled-versus-correct action-use gap, and comparison videos. The command
+fails when `--require-copy-last-win` is set and correct-action one-step PSNR
+does not beat copy-last.
+
 ## Sampling modes
 
 The model supports two scheduling modes during sampling:

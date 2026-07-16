@@ -6,8 +6,8 @@ This file is the only source of truth for execution status. The [project plan](d
 
 | Field | Value |
 | --- | --- |
-| Last updated | 2026-07-15 |
-| Overall status | Week 1 data exit gate passed; Day 3 model smoke test is next |
+| Last updated | 2026-07-16 |
+| Overall status | Week 1 data exit gate passed; Day 3 smoke implementation is ready for a Colab GPU run |
 | Current phase | Week 2 — baseline pipeline |
 | Active milestone | Day 3 — model smoke test |
 | Blocked | No |
@@ -21,6 +21,11 @@ Legend: `[ ]` not started · `[x]` complete. Add an evidence link before checkin
 3. Overfit the 32 clips for 500–1,000 steps and render predictions.
 4. Save a checkpoint, restart the runtime, and resume the full trainer state.
 5. Record the reconstruction, training log, comparison video, and resume evidence.
+
+The Day 3 implementation is available through `experiment=vizdoom_smoke`,
+`src/scripts/vizdoom_model_smoke.py`, and `notebooks/02_colab_day3.ipynb`.
+The checklist remains open until the fresh-runtime GPU run produces passing
+evidence under `reports/evidence/day3/`.
 
 Do not begin a long development run until the VAE, tiny-set overfit, generated-motion, and checkpoint-resume checks pass.
 
@@ -229,7 +234,9 @@ Use identical model size, VAE, data splits, training steps, optimizer, learning 
 
 ## Blockers
 
-No active blocker. Day 2 schema, alignment, visualization, and DataSource work has not started.
+No active blocker. Day 2 schema, alignment, visualization, and DataSource work
+is complete. Day 3 is awaiting execution on a Colab GPU; this is pending work,
+not a blocker.
 
 When adding a blocker, record its date, affected milestone, owner, attempted mitigations, and the condition required to clear it.
 
@@ -272,6 +279,7 @@ When adding a blocker, record its date, affected milestone, owner, attempted mit
 | Detailed research plan | [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) | Complete |
 | Progress tracker | [PROGRESS.md](PROGRESS.md) | Complete |
 | Colab notebook | [notebooks/01_colab_day1.ipynb](notebooks/01_colab_day1.ipynb) | Validated on a fresh Colab T4 runtime |
+| Day 3 Colab notebook | [notebooks/02_colab_day3.ipynb](notebooks/02_colab_day3.ipynb) | Ready to run; GPU evidence not yet produced |
 | Local VizDoom smoke report | [reports/evidence/day1/local-vizdoom-smoke.json](reports/evidence/day1/local-vizdoom-smoke.json) | Complete |
 | Pilot manifest | [reports/evidence/day1/pilot-manifest.json](reports/evidence/day1/pilot-manifest.json) | Complete |
 | Pilot episode video | [reports/evidence/day1/pilot_episode_00000.mp4](reports/evidence/day1/pilot_episode_00000.mp4) | Complete |

@@ -14,7 +14,9 @@ src/configs/
 │   ├── ablation_rt1.yaml        # RT-1 ablation arms (50k steps)
 │   ├── dino_wm_{env}.yaml       # DINO-WM per-env (point_maze, pusht, wall, rope, granular)
 │   ├── evaluate_only.yaml       # Evaluation-only run
-│   └── planning.yaml            # MPC planning run
+│   ├── planning.yaml            # MPC planning run
+│   ├── vizdoom_smoke.yaml       # 32-clip Day 3 overfit/resume gate
+│   └── vizdoom_dev.yaml         # 10k-step Week 2 development baseline
 ├── model/                       # Model architectures
 │   ├── nanowm_s2.yaml           # NanoWM-S/2 (~40M params)
 │   ├── nanowm_b2.yaml           # NanoWM-B/2 (~160M params, default)
@@ -116,6 +118,8 @@ Every run starts with `experiment=<name>`. Available profiles:
 | `dino_wm_{env}` | DINO-WM env-specific overrides |
 | `evaluate_only` | `tasks=[evaluate]`, full validation set |
 | `planning` | `tasks=[planning]`, requires `ckpt_path=...` |
+| `vizdoom_smoke` | Fixed 32-clip NanoWM-S/2 smoke run, 1k-step cap, frequent checkpoints |
+| `vizdoom_dev` | 10k-step VizDoom development baseline |
 
 </div>
 
@@ -190,6 +194,11 @@ Each dataset family has a `base.yaml` that fixes the schema, plus per-dataset ov
 #             val_slice_mode=exhaustive with fixed start indices
 #             action_dim=51 (keys + mouse), normalize_action=False
 ```
+
+Game loaders also accept `training_fixed_subset_{path,size,seed}`. The smoke
+profile supplies the equivalent `experiment.training.fixed_subset_*` values;
+the saved JSON contains stable trajectory/frame coordinates and a SHA-256 hash
+that is checked again on resume.
 
 **RT-1** (`src/configs/dataset/rt1/`):
 ```yaml

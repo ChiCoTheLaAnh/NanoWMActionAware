@@ -13,6 +13,9 @@ training:
     lr_warmup_steps: 1000
   max_steps: 1000000
   batch_size: 8
+  # 0.0 disables Lightning's tiny-set overfit mode. Smoke profiles may set
+  # this to 1.0 after constraining the training dataset to a fixed manifest.
+  overfit_batches: 0.0
   gradient_accumulation: 1
   gradient_clip_norm: 0.1
   gradient_clip_start_step: 20000

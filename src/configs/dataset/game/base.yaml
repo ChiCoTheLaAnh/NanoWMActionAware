@@ -10,6 +10,9 @@ loader:
   val_slice_mode: "exhaustive"
   stride: 1
   random_seed: 42
+  training_fixed_subset_path: null
+  training_fixed_subset_size: null
+  training_fixed_subset_seed: 42
   validation_fixed_subset_path: null
   validation_fixed_subset_size: null
   validation_fixed_subset_seed: 42

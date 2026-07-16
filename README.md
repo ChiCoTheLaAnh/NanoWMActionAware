@@ -16,7 +16,7 @@ This repository builds on the [official Nano World Model project](https://github
 
 ## Project Status
 
-**Status:** Week 1 data gate complete; Day 3 model smoke testing is next
+**Status:** Week 1 data gate complete; Day 3 model smoke implementation is ready for a Colab GPU run
 
 The official NanoWM source is integrated at upstream revision `2ee3c35`. The
 VizDoom collector, HDF5 schema, DataSource, Hydra dataset config, and four-frame
@@ -26,6 +26,13 @@ stored action maps its observation to the following observation. A fresh Colab T
 runtime passed the Day 1 dependency, import, and configuration smoke tests at
 project revision `23fb917`. No model, checkpoint, or training result has been
 produced.
+
+The Day 3 path now includes a deterministic 32-clip manifest, a dedicated
+NanoWM-S/2 smoke profile, VAE reconstruction and prediction evidence tools,
+and full-state checkpoint-resume verification. These are implemented but have
+not yet passed the GPU exit gate; open
+[`notebooks/02_colab_day3.ipynb`](notebooks/02_colab_day3.ipynb) in a fresh
+Colab GPU runtime to execute them.
 
 - Detailed design: [Project Plan](docs/PROJECT_PLAN.md)
 - Current work and evidence: [Progress Tracker](PROGRESS.md)
@@ -127,8 +134,35 @@ evidence.
 
 ## Reproduction
 
-Model reproduction commands, checkpoint locations, resolved training
-configurations, and expected metric outputs will be added only after their
-corresponding pipeline stages pass the documented exit gates.
+Compose the Day 3 smoke profile without starting a run:
 
-Do not collect the full dataset or begin long training runs until frame/action alignment, storage, loading, and the four-frame DataLoader batch have been verified.
+```bash
+python src/main.py --cfg job \
+  experiment=vizdoom_smoke dataset=game/vizdoom_basic model=nanowm_s2
+```
+
+The profile trains only a deterministic 32-clip subset, uses batch size 1 with
+gradient accumulation 8, checkpoints every 100 steps, and caps the run at
+1,000 optimizer steps. The Colab notebook performs the documented 500-step
+initial run, fresh-runtime resume to step 600, VAE check, loss check, and
+GT-versus-prediction render.
+
+After the Day 3 gate passes, evaluate the development checkpoint against
+copy-last, correct, zero, and shuffled actions with:
+
+```bash
+python src/evaluation/vizdoom_baselines.py \
+  --config <run>/config.yaml \
+  --checkpoint <run>/checkpoints/latest/<checkpoint>.ckpt \
+  --subset-manifest reports/evidence/week2/fixed-validation-clips.json \
+  --output-dir reports/evidence/week2/baselines \
+  --require-copy-last-win
+```
+
+Development/final reproduction commands, checkpoint locations, resolved
+training configurations, and expected metric outputs will be added only after
+their corresponding pipeline stages pass the documented exit gates.
+
+The data-alignment gate is complete. Do not collect the full dataset or begin
+long training runs until the Day 3 VAE, tiny-set overfit, generated-motion, and
+checkpoint-resume checks also pass.

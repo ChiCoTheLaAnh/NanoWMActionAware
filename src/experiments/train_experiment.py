@@ -4,6 +4,7 @@ import sys
 import math
 import random
 import logging
+import hashlib
 
 import numpy as np
 import torch
@@ -426,6 +427,47 @@ class TrainExperiment(BaseExperiment):
         # Use module-level logger (configured by Hydra)
         self.logger = logging.getLogger(__name__)
 
+    def _validate_project_profile_contract(self):
+        """Fail early when a project profile is paired with unsafe overrides."""
+        args = self.cfg
+        if args.experiment.name != "vizdoom_smoke":
+            return
+
+        fixed_size = args.dataset.loader.get("training_fixed_subset_size")
+        if fixed_size is None:
+            fixed_size = args.experiment.training.get("fixed_subset_size")
+        checks = {
+            "dataset.name": (args.dataset.name, "vizdoom_basic"),
+            "model.arch": (args.model.arch, "NanoWM-S/2"),
+            "model.num_frames": (args.model.num_frames, 4),
+            "model.n_context_frames": (args.model.n_context_frames, 1),
+            "training.batch_size": (args.experiment.training.batch_size, 1),
+            "training.fixed_subset_size": (fixed_size, 32),
+            "training.overfit_batches": (args.experiment.training.overfit_batches, 1.0),
+        }
+        mismatches = {
+            key: {"actual": actual, "required": required}
+            for key, (actual, required) in checks.items()
+            if actual != required
+        }
+        accumulation = int(args.experiment.training.gradient_accumulation)
+        if not 8 <= accumulation <= 16:
+            mismatches["training.gradient_accumulation"] = {
+                "actual": accumulation,
+                "required": "8..16",
+            }
+        max_steps = int(args.experiment.training.max_steps)
+        if not 10 <= max_steps <= 1000:
+            mismatches["training.max_steps"] = {
+                "actual": max_steps,
+                "required": "10..1000",
+            }
+        if mismatches:
+            raise ValueError(
+                "vizdoom_smoke safety contract rejected the composed config: "
+                f"{mismatches}"
+            )
+
     def _create_experiment_directory(self):
         """Create experiment directory structure (simplified version)."""
         experiment_dir = HydraConfig.get().runtime.output_dir
@@ -540,6 +582,107 @@ class TrainExperiment(BaseExperiment):
             self.logger.info(f"Saved fixed validation subset: {len(val_dataset)} slices to {subset_path}")
         return val_dataset
 
+    @staticmethod
+    def _slice_specs_sha256(slice_specs):
+        canonical = json.dumps(
+            slice_specs,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        return hashlib.sha256(canonical).hexdigest()
+
+    def _apply_fixed_training_subset(self, train_dataset, experiment_dir):
+        """Freeze a deterministic tiny training set and persist its identity.
+
+        The saved slice coordinates are stable across DataLoader shuffles and
+        runtime restarts. This is intentionally separate from Lightning's
+        ``overfit_batches`` flag: the manifest defines *which* clips are used,
+        while the Trainer flag controls whether validation reuses them.
+        """
+        loader_cfg = self.cfg.dataset.loader
+        training_cfg = self.cfg.experiment.training
+        loader_path = loader_cfg.get("training_fixed_subset_path")
+        loader_size = loader_cfg.get("training_fixed_subset_size")
+        if loader_path is not None or loader_size is not None:
+            subset_path = loader_path
+            subset_size = loader_size
+            subset_seed = loader_cfg.get("training_fixed_subset_seed", 42)
+        else:
+            subset_path = training_cfg.get("fixed_subset_path")
+            subset_size = training_cfg.get("fixed_subset_size")
+            subset_seed = training_cfg.get("fixed_subset_seed", 42)
+
+        if subset_path is None and subset_size is None:
+            return train_dataset
+        if train_dataset.slice_mode != "exhaustive":
+            raise ValueError("Fixed training subset requires train_slice_mode='exhaustive'")
+
+        if subset_path is None:
+            subset_path = os.path.join(experiment_dir, "training_subset.json")
+        elif not os.path.isabs(subset_path):
+            subset_path = os.path.join(get_original_cwd(), subset_path)
+
+        if os.path.exists(subset_path):
+            with open(subset_path, "r", encoding="utf-8") as f:
+                payload = json.load(f)
+            slice_specs = payload.get("slices", [])
+            if not slice_specs:
+                raise ValueError(f"Empty training subset file: {subset_path}")
+            if subset_size is not None and len(slice_specs) != subset_size:
+                raise ValueError(
+                    f"Fixed training subset size mismatch: requested {subset_size}, "
+                    f"but file has {len(slice_specs)} slices ({subset_path})"
+                )
+            expected_hash = payload.get("slices_sha256")
+            actual_hash = self._slice_specs_sha256(slice_specs)
+            if expected_hash is None:
+                raise ValueError(f"Fixed training subset is missing slices_sha256: {subset_path}")
+            if expected_hash != actual_hash:
+                raise ValueError(
+                    f"Fixed training subset hash mismatch: expected {expected_hash}, "
+                    f"computed {actual_hash} ({subset_path})"
+                )
+            train_dataset.set_fixed_slices(slice_specs)
+            if is_rank_zero:
+                self.logger.info(
+                    f"Loaded fixed training subset: {len(train_dataset)} slices "
+                    f"from {subset_path} (sha256={actual_hash})"
+                )
+            return train_dataset
+
+        if subset_size is None:
+            raise ValueError("training_fixed_subset_size is required to generate a new fixed subset")
+        if subset_seed is None:
+            raise ValueError("training_fixed_subset_seed is required to generate a new fixed subset")
+
+        slice_specs = train_dataset.sample_fixed_slice_specs(subset_size, seed=subset_seed)
+        slices_sha256 = self._slice_specs_sha256(slice_specs)
+        payload = {
+            "dataset": {
+                "name": self.cfg.dataset.name,
+                "num_frames": self.cfg.model.num_frames,
+                "frame_interval": self.cfg.dataset.frame_interval,
+                "split_ratio": loader_cfg.split_ratio,
+                "train_slice_mode": loader_cfg.train_slice_mode,
+                "stride": loader_cfg.stride,
+                "random_seed": loader_cfg.random_seed,
+            },
+            "selection_seed": subset_seed,
+            "slices_sha256": slices_sha256,
+            "slices": slice_specs,
+        }
+        os.makedirs(os.path.dirname(subset_path) or ".", exist_ok=True)
+        with open(subset_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2, sort_keys=True)
+            f.write("\n")
+        train_dataset.set_fixed_slices(slice_specs)
+        if is_rank_zero:
+            self.logger.info(
+                f"Saved fixed training subset: {len(train_dataset)} slices to "
+                f"{subset_path} (sha256={slices_sha256})"
+            )
+        return train_dataset
+
     def _load_checkpoint(self, args, pl_module):
         """Load checkpoint (simplified version, uses self.logger)."""
         if not args.experiment.resume_from_checkpoint:
@@ -629,6 +772,7 @@ class TrainExperiment(BaseExperiment):
             MetricsLogger + LearningRateMonitor, but no checkpoint callbacks).
         """
         args = self.cfg
+        self._validate_project_profile_contract()
         seed = args.experiment.infra.seed
         _seed_everything(seed)
         self._seed = seed  # for dataloader generator
@@ -683,13 +827,18 @@ class TrainExperiment(BaseExperiment):
             if is_rank_zero:
                 print("[Data] Datasets created", flush=True)
 
+            if need_train:
+                train_dataset = self._apply_fixed_training_subset(train_dataset, experiment_dir)
             val_dataset = self._apply_fixed_validation_subset(val_dataset, experiment_dir)
+        validation_size = args.dataset.loader.validation_size
+        if validation_size is None:
+            validation_size = args.experiment.evaluation.get("validation_size")
         if (
-            args.dataset.loader.validation_size is not None
+            validation_size is not None
             and args.dataset.loader.validation_fixed_subset_path is None
             and args.dataset.loader.validation_fixed_subset_size is None
         ):
-            indices = list(range(min(len(val_dataset), args.dataset.loader.validation_size)))
+            indices = list(range(min(len(val_dataset), validation_size)))
             val_dataset = Subset(val_dataset, indices)
             if is_rank_zero:
                 self.logger.info(f"Using {len(val_dataset)} validation samples")
@@ -851,6 +1000,7 @@ class TrainExperiment(BaseExperiment):
             num_nodes=num_nodes,
             enable_checkpointing=True,
             max_steps=args.experiment.training.max_steps,
+            overfit_batches=args.experiment.training.get("overfit_batches", 0.0),
             logger=loggers,
             callbacks=callbacks_list,
             log_every_n_steps=args.experiment.training.log_every,

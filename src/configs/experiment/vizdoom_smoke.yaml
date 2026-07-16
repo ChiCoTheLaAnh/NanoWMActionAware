@@ -1,0 +1,54 @@
+defaults:
+  - default
+
+name: vizdoom_smoke
+
+training:
+  optimizer:
+    lr: 1e-4
+    lr_warmup_steps: 50
+  max_steps: 1000
+  batch_size: 1
+  overfit_batches: 1.0
+  fixed_subset_path: reports/evidence/day3/fixed-train-clips.json
+  fixed_subset_size: 32
+  fixed_subset_seed: 42
+  gradient_accumulation: 8
+  gradient_clip_start_step: 0
+  log_every: 10
+  val_every_n_steps: 100
+  checkpointing:
+    across_timesteps:
+      every_n_train_steps: 250
+      save_top_k: -1
+      save_on_train_epoch_end: false
+      save_weights_only: false
+      filename: "smoke-{epoch}-{step}"
+    latest:
+      every_n_train_steps: 100
+      save_top_k: 1
+      save_on_train_epoch_end: false
+      save_weights_only: false
+      filename: "latest-smoke-{epoch}-{step}"
+
+evaluation:
+  batch_size: 1
+  validation_size: 4
+  save_videos: false
+  scheduling_mode: full_sequence
+  num_sampling_steps: 10
+  metrics:
+    # The dedicated smoke runner writes reconstruction/prediction evidence.
+    # Keep training validation cheap and independent of I3D/LPIPS downloads.
+    evaluate: false
+    log_every_n_train_steps: 100
+    buffer_size: 4
+    max_batchsize: 1
+
+infra:
+  mixed_precision: true
+  vae_precision: fp32
+  gradient_checkpointing: false
+  num_workers: 2
+  compile: false
+  seed: 3407
