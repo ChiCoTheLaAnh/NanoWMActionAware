@@ -1,6 +1,6 @@
 # Datasets
 
-The repo ships configs for three dataset families: **DINO-WM** (5 simulated environments), **RT-1 fractal** (real-robot LeRobot), and **CSGO** (Counter-Strike deathmatch). All datasets feed through a common `WorldModelDataset` interface — see `src/wm_datasets/`.
+The repo ships configs for four dataset families: **VizDoom Basic** (the project pilot environment), **DINO-WM** (5 simulated environments), **RT-1 fractal** (real-robot LeRobot), and **CSGO** (Counter-Strike deathmatch). All datasets feed through a common `WorldModelDataset` interface — see `src/wm_datasets/`.
 
 <div align="center">
 
@@ -24,6 +24,7 @@ Or use the gitignored `src/configs/local/paths.yaml` (template at `paths.yaml.ex
 
 | Dataset | Episodes | Frames/ep | Resolution | Action dim | Train sampling | Notes |
 |:--------|:---------|:----------|:-----------|:-----------|:---------------|:------|
+| VizDoom Basic pilot | 100 | 1–75 | 160×120 → 256² | 3 | exhaustive | letterbox resize; collection frame skip=4 |
 | DINO-WM Point Maze | ~500 | ~100–200 | 256² | 2 | exhaustive | frame_interval=5 |
 | DINO-WM PushT | ~1000 | ~100–200 | 256² | 2 | exhaustive | relative actions, action_scale=100 |
 | DINO-WM Wall | ~500 | ~100–200 | 256² | 2 | exhaustive | |
@@ -33,6 +34,31 @@ Or use the gitignored `src/configs/local/paths.yaml` (template at `paths.yaml.ex
 | CSGO | 5500 | 1000 | 320×512 | 51 | random | fixed val start indices, frame_interval=1 |
 
 </div>
+
+---
+
+## VizDoom Basic
+
+The project collector writes one schema-v1 HDF5 file per deterministic episode. Each stored action is aligned as $a_t: o_t \rightarrow o_{t+1}$; NanoWM applies the corresponding one-step action shift internally.
+
+```text
+${DATASET_DIR}/vizdoom_basic/pilot/
+├── manifest.json
+├── episode_00000.hdf5
+└── ...
+```
+
+Each episode contains `frames`, integer `actions`, `action_onehot`, `rewards`, `dones`, `seed`, and `success`. The loader keeps RGB channel order, letterboxes frames to 256×256, and returns one-hot actions with dimension 3.
+
+```bash
+python src/scripts/validate_vizdoom_dataset.py \
+  --dataset-dir "${DATASET_DIR}/vizdoom_basic/pilot" \
+  --evidence-dir reports/evidence/day2
+
+python src/main.py dataset=game/vizdoom_basic model=nanowm_s2 --cfg job
+```
+
+Config: `src/configs/dataset/game/vizdoom_basic.yaml`. DataSource: `src/wm_datasets/data_source/game/vizdoom_data_source.py`.
 
 ---
 

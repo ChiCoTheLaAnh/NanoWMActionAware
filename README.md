@@ -16,13 +16,16 @@ This repository builds on the [official Nano World Model project](https://github
 
 ## Project Status
 
-**Status:** Day 1 complete; Day 2 alignment and data loading are next
+**Status:** Week 1 data gate complete; Day 3 model smoke testing is next
 
 The official NanoWM source is integrated at upstream revision `2ee3c35`. The
-VizDoom collector and schema tests are implemented, and a deterministic
-10-episode pilot set plus video has been produced. A fresh Colab T4 runtime
-passed the dependency, import, and Hydra configuration smoke tests at project
-revision `23fb917`. No model, checkpoint, or training result has been produced.
+VizDoom collector, HDF5 schema, DataSource, Hydra dataset config, and four-frame
+DataLoader path are implemented. The 100-episode pilot set (seeds 42–141) has
+4,459 stored transitions; replay validation confirmed that every nonterminal
+stored action maps its observation to the following observation. A fresh Colab T4
+runtime passed the Day 1 dependency, import, and configuration smoke tests at
+project revision `23fb917`. No model, checkpoint, or training result has been
+produced.
 
 - Detailed design: [Project Plan](docs/PROJECT_PLAN.md)
 - Current work and evidence: [Progress Tracker](PROGRESS.md)

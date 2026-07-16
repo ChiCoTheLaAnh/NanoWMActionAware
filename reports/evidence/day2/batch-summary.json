@@ -1,0 +1,30 @@
+{
+  "action_alignment": "NanoWM shifts actions internally: action[t] conditions frame[t+1]; the final clip action is unused.",
+  "action_dtype": "torch.float32",
+  "action_shape": [
+    2,
+    4,
+    3
+  ],
+  "batch_size": 2,
+  "context_frames": 1,
+  "first_batch_video_names": [
+    "traj_0083_start_0000",
+    "traj_0083_start_0001"
+  ],
+  "future_frames": 3,
+  "short_episodes_skipped_by_slice_indexer": 8,
+  "status": "passed",
+  "train_slices": 3554,
+  "validation_slices": 607,
+  "video_dtype": "torch.float32",
+  "video_max": 1.0,
+  "video_min": -1.0,
+  "video_shape": [
+    2,
+    4,
+    3,
+    256,
+    256
+  ]
+}

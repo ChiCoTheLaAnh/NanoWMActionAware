@@ -4,9 +4,6 @@ Factory helpers for DataSource creation.
 
 from typing import Optional
 
-from .dino_wm import DinoWorldModelDataSource, PushTDataSource, DeformableEnvDataSource
-from .lerobot import LeRobotDataSource
-from .game import CSGODataSource
 from .base import DataSource
 
 
@@ -20,6 +17,8 @@ def create_data_source(
     Factory function to create the appropriate data source based on dataset name.
     """
     if dataset_name in ["point_maze", "wall"]:
+        from .dino_wm import DinoWorldModelDataSource
+
         return DinoWorldModelDataSource(
             data_path=data_path,
             video_format="pth",
@@ -28,6 +27,8 @@ def create_data_source(
         )
 
     if dataset_name == "pusht":
+        from .dino_wm import PushTDataSource
+
         if "use_relative_actions" not in kwargs:
             raise ValueError(
                 "PushT dataset requires explicit 'use_relative_actions' parameter in config. "
@@ -40,6 +41,8 @@ def create_data_source(
         )
 
     if dataset_name in ["rope", "granular"]:
+        from .dino_wm import DeformableEnvDataSource
+
         if "object_name" not in kwargs or kwargs["object_name"] is None:
             kwargs["object_name"] = dataset_name
         return DeformableEnvDataSource(
@@ -49,6 +52,8 @@ def create_data_source(
         )
 
     if dataset_name == "rt1":
+        from .lerobot import LeRobotDataSource
+
         # RT-1 is consumed as the lerobot HF dataset (fractal20220817_data).
         # `data_path` is the HF repo_id; optional `root` kwarg points to a
         # local mirror. No per-episode .pth format is supported.
@@ -61,6 +66,8 @@ def create_data_source(
         )
 
     if dataset_name == "csgo":
+        from .game import CSGODataSource
+
         # Filter kwargs - CSGO only supports file_list and use_auxiliary_state
         csgo_kwargs = {
             k: v for k, v in kwargs.items()
@@ -72,7 +79,16 @@ def create_data_source(
             **csgo_kwargs
         )
 
+    if dataset_name == "vizdoom_basic":
+        from .game import VizDoomDataSource
+
+        return VizDoomDataSource(
+            data_path=data_path,
+            n_rollout=n_rollout,
+        )
+
     raise ValueError(
         f"Unknown dataset: {dataset_name}. "
-        f"Supported: point_maze, wall, pusht, rope, granular, rt1, csgo"
+        f"Supported: point_maze, wall, pusht, rope, granular, rt1, csgo, "
+        "vizdoom_basic"
     )

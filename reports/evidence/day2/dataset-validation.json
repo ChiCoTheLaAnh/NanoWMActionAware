@@ -1,0 +1,725 @@
+{
+  "action_counts": {
+    "left": 1520,
+    "right": 1476,
+    "shoot": 1463
+  },
+  "action_fractions": {
+    "left": 0.3408836061897286,
+    "right": 0.3310159228526576,
+    "shoot": 0.3281004709576138
+  },
+  "dataset_dir": "data/vizdoom_basic/pilot",
+  "episodes": 100,
+  "files": [
+    {
+      "file": "episode_00000.hdf5",
+      "length": 30,
+      "seed": 42,
+      "sha256": "0734175e71bb2e343065ac427b2c68a0db955cfacc89f7247dc4cfc7076db42e",
+      "success": true
+    },
+    {
+      "file": "episode_00001.hdf5",
+      "length": 12,
+      "seed": 43,
+      "sha256": "06f089d82f9c8cc9f437cc15f1cfac60a109d15aa4d05dbff53272a382c71f28",
+      "success": true
+    },
+    {
+      "file": "episode_00002.hdf5",
+      "length": 40,
+      "seed": 44,
+      "sha256": "266dfcdf5c0e657def4ded34a723bfded4410dd33759f2c7b8e935d0e062a5ab",
+      "success": true
+    },
+    {
+      "file": "episode_00003.hdf5",
+      "length": 7,
+      "seed": 45,
+      "sha256": "d14e17407fad6043953a2f3726362344dcf67fcc30a231e531231920be558a26",
+      "success": true
+    },
+    {
+      "file": "episode_00004.hdf5",
+      "length": 3,
+      "seed": 46,
+      "sha256": "1c94c398eb64dc972255efced49a6574f764c605afad586d0d91b3c8a04c12cc",
+      "success": true
+    },
+    {
+      "file": "episode_00005.hdf5",
+      "length": 75,
+      "seed": 47,
+      "sha256": "f4793be348e985844df451a00af1300660882ff675da37595be950f6e2e76eec",
+      "success": false
+    },
+    {
+      "file": "episode_00006.hdf5",
+      "length": 75,
+      "seed": 48,
+      "sha256": "4d26475b92e1f1bedc868916b8c4498408d82dce8fa750f21e42c1da684ce187",
+      "success": false
+    },
+    {
+      "file": "episode_00007.hdf5",
+      "length": 23,
+      "seed": 49,
+      "sha256": "ab684026c6c4cd0481b596a3c6026addeef1edddf778b8772d41cdda3a23f660",
+      "success": true
+    },
+    {
+      "file": "episode_00008.hdf5",
+      "length": 33,
+      "seed": 50,
+      "sha256": "f2d89d8bcf50111e998b7a3ba213ce80c6eda18ed02fc836c214f9d713bddff0",
+      "success": true
+    },
+    {
+      "file": "episode_00009.hdf5",
+      "length": 10,
+      "seed": 51,
+      "sha256": "6f85c758085a81020d8c4154ee8759cf6e759861be6bd43e08bcc9fdc8050863",
+      "success": true
+    },
+    {
+      "file": "episode_00010.hdf5",
+      "length": 8,
+      "seed": 52,
+      "sha256": "97d47a1445dd1aac1026782f7d0527bccfec87d433a9c4339532179ac8c6e060",
+      "success": true
+    },
+    {
+      "file": "episode_00011.hdf5",
+      "length": 2,
+      "seed": 53,
+      "sha256": "1888561a49af3a84cca5a018fda217fd33bdfc4726a1fc7fb93425835394c14d",
+      "success": true
+    },
+    {
+      "file": "episode_00012.hdf5",
+      "length": 75,
+      "seed": 54,
+      "sha256": "79ef7cf879779be408b8f12fdfe7da35b85ee97f2461739e93e109d4bef410fd",
+      "success": false
+    },
+    {
+      "file": "episode_00013.hdf5",
+      "length": 75,
+      "seed": 55,
+      "sha256": "59431ff41bc0b5b44d279984676123f55ebaed71434bd0ee2b58fab41dad35c3",
+      "success": false
+    },
+    {
+      "file": "episode_00014.hdf5",
+      "length": 75,
+      "seed": 56,
+      "sha256": "ca4fa504da0078bc6349d1cd3902ea7fe00c46014fb041cf53cc658f49e85d39",
+      "success": false
+    },
+    {
+      "file": "episode_00015.hdf5",
+      "length": 3,
+      "seed": 57,
+      "sha256": "4f1f0d40e42639e7001ea0752e67e2f5bbefb17a5dcb2afc7396d9ae58c6ffc2",
+      "success": true
+    },
+    {
+      "file": "episode_00016.hdf5",
+      "length": 18,
+      "seed": 58,
+      "sha256": "adc3d0f68e50c8708309aa4088a36d4888efba973f301409696fd4af35ef24bc",
+      "success": true
+    },
+    {
+      "file": "episode_00017.hdf5",
+      "length": 21,
+      "seed": 59,
+      "sha256": "8d18277c11d5656c484ada5cfe1437f22db9a8c8d80c6e637634271d18ee0fde",
+      "success": true
+    },
+    {
+      "file": "episode_00018.hdf5",
+      "length": 75,
+      "seed": 60,
+      "sha256": "32ebcc51c245e0f012bdd183968744640643d5bb48212df4c61f143386ce3141",
+      "success": false
+    },
+    {
+      "file": "episode_00019.hdf5",
+      "length": 75,
+      "seed": 61,
+      "sha256": "9adf4f53f60137f57acede29598d8c7b554b517e279ba8e8c6f9354af3f4f859",
+      "success": false
+    },
+    {
+      "file": "episode_00020.hdf5",
+      "length": 75,
+      "seed": 62,
+      "sha256": "9421370e27792729a0857825d7e7602ac446fc33f010990603d713f7539d6086",
+      "success": false
+    },
+    {
+      "file": "episode_00021.hdf5",
+      "length": 4,
+      "seed": 63,
+      "sha256": "916b6ce4462cae4f0244816ac18d5c3e1a6ea16e08de2e78d076a4f61ad0a3f5",
+      "success": true
+    },
+    {
+      "file": "episode_00022.hdf5",
+      "length": 75,
+      "seed": 64,
+      "sha256": "4eb530bfa7440c5e137f3ee4413a7b6f084ea3b804a4cda897511e000fc489cc",
+      "success": false
+    },
+    {
+      "file": "episode_00023.hdf5",
+      "length": 24,
+      "seed": 65,
+      "sha256": "de2402cd9a88f75bebeed1fa4024a8d6786d9b30639b701dd4ff206b30d282dd",
+      "success": true
+    },
+    {
+      "file": "episode_00024.hdf5",
+      "length": 5,
+      "seed": 66,
+      "sha256": "2fc7c73e0b334ac55568c1a036f49f25c07fd607c84b68effa3e4a88d32eac57",
+      "success": true
+    },
+    {
+      "file": "episode_00025.hdf5",
+      "length": 68,
+      "seed": 67,
+      "sha256": "296e57488d1e53e606939d1fcb23998cad7b8245abf1ff007fc3018e3a389c02",
+      "success": true
+    },
+    {
+      "file": "episode_00026.hdf5",
+      "length": 75,
+      "seed": 68,
+      "sha256": "474dfce8c20d2dda5f85a4f3ac5dfd8f5b3b43377f9602cdd8f7579c9fbc95f2",
+      "success": false
+    },
+    {
+      "file": "episode_00027.hdf5",
+      "length": 75,
+      "seed": 69,
+      "sha256": "41b5646f7060dc6d7d3ce550c69cb92413a54d018232eb8393c435bc27327483",
+      "success": false
+    },
+    {
+      "file": "episode_00028.hdf5",
+      "length": 5,
+      "seed": 70,
+      "sha256": "1f00fe44be3555375b03d73bc74d51c4e29cda40f18354b6d554e61e3e43c155",
+      "success": true
+    },
+    {
+      "file": "episode_00029.hdf5",
+      "length": 75,
+      "seed": 71,
+      "sha256": "38bd8b511f9b50d5ca665868d820b47f87603d04838ce8d11c6de3180560f5f0",
+      "success": false
+    },
+    {
+      "file": "episode_00030.hdf5",
+      "length": 75,
+      "seed": 72,
+      "sha256": "8879cfde2718d22e88a3f0d4d3f8ed7c125b8b37ba67d0472c827d720c56c791",
+      "success": false
+    },
+    {
+      "file": "episode_00031.hdf5",
+      "length": 8,
+      "seed": 73,
+      "sha256": "d9a1acf6c0fb1ef8966812cf2dbb1125973ab57625ac7e761712e6f778d98bd8",
+      "success": true
+    },
+    {
+      "file": "episode_00032.hdf5",
+      "length": 3,
+      "seed": 74,
+      "sha256": "40d111c744b141b15f0c75e76b5471b3db802a5d3b2b937f78e6eb3bb28bc147",
+      "success": true
+    },
+    {
+      "file": "episode_00033.hdf5",
+      "length": 33,
+      "seed": 75,
+      "sha256": "84dd2019b85b2358fa100e6fdca7acc98c493a7be00d2b9ade03a3872213ac39",
+      "success": true
+    },
+    {
+      "file": "episode_00034.hdf5",
+      "length": 59,
+      "seed": 76,
+      "sha256": "20bab3ea3a327640a8c10d83b34e192806edfd94ea313f3a5803267c7babbf3a",
+      "success": true
+    },
+    {
+      "file": "episode_00035.hdf5",
+      "length": 3,
+      "seed": 77,
+      "sha256": "dd3742fa56588f8e657570b66098cb5a356d96f3857f556d7901379d43ee7056",
+      "success": true
+    },
+    {
+      "file": "episode_00036.hdf5",
+      "length": 75,
+      "seed": 78,
+      "sha256": "5b9af4ee0c60fbbf8739e049d97acea0e52377047ba4a42076b5ec2cb0c9f1f0",
+      "success": false
+    },
+    {
+      "file": "episode_00037.hdf5",
+      "length": 75,
+      "seed": 79,
+      "sha256": "ae2e8336a3fc83f169a1f87d6c35def08e7f06b992cb709ad845ed2ef305af45",
+      "success": false
+    },
+    {
+      "file": "episode_00038.hdf5",
+      "length": 28,
+      "seed": 80,
+      "sha256": "e1762ebc856e82b0c31976c971fa02dbd2d38889fd6fd53d8a78b71986462581",
+      "success": true
+    },
+    {
+      "file": "episode_00039.hdf5",
+      "length": 29,
+      "seed": 81,
+      "sha256": "6c8b408a5b3ab184ef7c6f03926573d7ddfeea4afe6268c7877ebc07633e84e9",
+      "success": true
+    },
+    {
+      "file": "episode_00040.hdf5",
+      "length": 75,
+      "seed": 82,
+      "sha256": "9e3b5f09b5f63df2b88fe98f40dc580e215fce9b00e5c985a6ab2600d921c46c",
+      "success": false
+    },
+    {
+      "file": "episode_00041.hdf5",
+      "length": 75,
+      "seed": 83,
+      "sha256": "9c23ca0858a6891db02c79acdda9c1d4d20aca423c4915859d8e75151ec78f3c",
+      "success": false
+    },
+    {
+      "file": "episode_00042.hdf5",
+      "length": 75,
+      "seed": 84,
+      "sha256": "6b387a3c10564f6c887ad56880b095c5d55909178411745c12f5070043c1a23f",
+      "success": false
+    },
+    {
+      "file": "episode_00043.hdf5",
+      "length": 53,
+      "seed": 85,
+      "sha256": "f62ad87e1491f5f337eb8c36f9dd303a3d72f8c64212bb2ce05abee4c694c4e2",
+      "success": true
+    },
+    {
+      "file": "episode_00044.hdf5",
+      "length": 18,
+      "seed": 86,
+      "sha256": "afa37e99d1a9fa5179df69de6ce7098eee6a10d5d078882e3c38042bf4c54622",
+      "success": true
+    },
+    {
+      "file": "episode_00045.hdf5",
+      "length": 71,
+      "seed": 87,
+      "sha256": "32f4b63fc3e3e6392c8f27ac438f0f04da2a70557d3c8f1473768c986628c426",
+      "success": true
+    },
+    {
+      "file": "episode_00046.hdf5",
+      "length": 75,
+      "seed": 88,
+      "sha256": "652ea54805a778839d3d88cd814f9d44b170ec08cea3014ae3542250782a173c",
+      "success": false
+    },
+    {
+      "file": "episode_00047.hdf5",
+      "length": 62,
+      "seed": 89,
+      "sha256": "5f012b52479a5d6a18ce7916fdf2eae5859f23ced8277f56d01e1d884ce491f8",
+      "success": true
+    },
+    {
+      "file": "episode_00048.hdf5",
+      "length": 16,
+      "seed": 90,
+      "sha256": "211744ca25f0e2c0823f0bf7bd1a9b9a77903a60051d5b98405ecd00579e1006",
+      "success": true
+    },
+    {
+      "file": "episode_00049.hdf5",
+      "length": 2,
+      "seed": 91,
+      "sha256": "d1c3e7cb6d9f871526d2ccb89f0efbf67d51eb11b6ab51c984c8e7c105915bae",
+      "success": true
+    },
+    {
+      "file": "episode_00050.hdf5",
+      "length": 59,
+      "seed": 92,
+      "sha256": "50c65762d5d003e441475cf63112312e15254b53b9d29a8149e6830d8b5cd9ab",
+      "success": true
+    },
+    {
+      "file": "episode_00051.hdf5",
+      "length": 38,
+      "seed": 93,
+      "sha256": "0086f494995a51916641699f6cbbfcb370a7aab41bafab5c4cfce27793a393d8",
+      "success": true
+    },
+    {
+      "file": "episode_00052.hdf5",
+      "length": 12,
+      "seed": 94,
+      "sha256": "eb39dc6370118a34337ad85ec95b437c3d0ae167af5b84d925346116572269cf",
+      "success": true
+    },
+    {
+      "file": "episode_00053.hdf5",
+      "length": 16,
+      "seed": 95,
+      "sha256": "1f65bc602cf03313b7db0baeee28348d85900f9db5ee0e5833d6a7115fe83545",
+      "success": true
+    },
+    {
+      "file": "episode_00054.hdf5",
+      "length": 75,
+      "seed": 96,
+      "sha256": "fda306384b5ada6b45303624675202d45591d6e6c626d8c25a10779479b862b6",
+      "success": false
+    },
+    {
+      "file": "episode_00055.hdf5",
+      "length": 28,
+      "seed": 97,
+      "sha256": "21e235676308b891edb4d7c966e384d035d02b59a1c2c81c678bba4b5c521d14",
+      "success": true
+    },
+    {
+      "file": "episode_00056.hdf5",
+      "length": 75,
+      "seed": 98,
+      "sha256": "725c7cdcf211a2a8af89e1bb15abbd215d548bc516068068812cf702705182ef",
+      "success": false
+    },
+    {
+      "file": "episode_00057.hdf5",
+      "length": 75,
+      "seed": 99,
+      "sha256": "fd1da8b05e49b6b4fe7a099ad170bb066fa8aa56d8706b74bfcc4a86c108f85b",
+      "success": false
+    },
+    {
+      "file": "episode_00058.hdf5",
+      "length": 75,
+      "seed": 100,
+      "sha256": "357273859f87fff2138b8bcaaace90e3b2a9058a9632211bc295bb6c2df78a3a",
+      "success": false
+    },
+    {
+      "file": "episode_00059.hdf5",
+      "length": 3,
+      "seed": 101,
+      "sha256": "04891774d30b6488d7d6861b7348a049226f120c6612306d75d11d9f682a50c3",
+      "success": true
+    },
+    {
+      "file": "episode_00060.hdf5",
+      "length": 75,
+      "seed": 102,
+      "sha256": "7f0c7dffa258157aa3271d0232213aeb0d8a9d5faa7780c7f6060e9858efcea7",
+      "success": false
+    },
+    {
+      "file": "episode_00061.hdf5",
+      "length": 6,
+      "seed": 103,
+      "sha256": "74bb072a3b8e8cde0744338814d8fbafc90b858905512307603d38849d6d8015",
+      "success": true
+    },
+    {
+      "file": "episode_00062.hdf5",
+      "length": 75,
+      "seed": 104,
+      "sha256": "17d43ab626d98961bf3d13e7bdd804742e0575cf8f9960d9f417aa42da1d2a51",
+      "success": false
+    },
+    {
+      "file": "episode_00063.hdf5",
+      "length": 75,
+      "seed": 105,
+      "sha256": "7b72fcad5206cbdac56da1c495ca7107d6f98f1a2dc5662e078f5e6d7c142a49",
+      "success": false
+    },
+    {
+      "file": "episode_00064.hdf5",
+      "length": 75,
+      "seed": 106,
+      "sha256": "e361373757eeb5f9661cf491a673052c3770b6b0b9417d21aad849ee905001f9",
+      "success": false
+    },
+    {
+      "file": "episode_00065.hdf5",
+      "length": 30,
+      "seed": 107,
+      "sha256": "99b201e6557debf024abcaee1c834ccd70a5c8df810c61d557e094ce1d78ae89",
+      "success": true
+    },
+    {
+      "file": "episode_00066.hdf5",
+      "length": 75,
+      "seed": 108,
+      "sha256": "b0c67574366eb519978d3965f50ed61daeddb51bfbf66c6b260cf82230cada79",
+      "success": false
+    },
+    {
+      "file": "episode_00067.hdf5",
+      "length": 75,
+      "seed": 109,
+      "sha256": "6244c310b56c4b845b81c5cf3fb1760c0094596440a35387dfc06a3697013e6b",
+      "success": false
+    },
+    {
+      "file": "episode_00068.hdf5",
+      "length": 42,
+      "seed": 110,
+      "sha256": "01bf616ec50ae21be58b5db17b9839b768220b55e5d33828f58299ef3c82e312",
+      "success": true
+    },
+    {
+      "file": "episode_00069.hdf5",
+      "length": 75,
+      "seed": 111,
+      "sha256": "4b697240adcf437e78e8c98fba98bcae520546399adb43d9185395868996fc79",
+      "success": false
+    },
+    {
+      "file": "episode_00070.hdf5",
+      "length": 18,
+      "seed": 112,
+      "sha256": "cdd9af2a3378883ad50468ba556c2d0cf589fdce73b4ae97eb74aced96efe609",
+      "success": true
+    },
+    {
+      "file": "episode_00071.hdf5",
+      "length": 75,
+      "seed": 113,
+      "sha256": "57844ee1ec3a90b58bf0d4c8954b3731f9be0e0234fe7ec981cc6fe692460336",
+      "success": false
+    },
+    {
+      "file": "episode_00072.hdf5",
+      "length": 45,
+      "seed": 114,
+      "sha256": "9b2dc6925d7508f027ea37008d27f6a550fe53812037bad5b02d8571f0b6303d",
+      "success": true
+    },
+    {
+      "file": "episode_00073.hdf5",
+      "length": 75,
+      "seed": 115,
+      "sha256": "f8affe99bf80071a0ca220082c89cf83997e5d1cdd1f8907304d1e28d8536732",
+      "success": false
+    },
+    {
+      "file": "episode_00074.hdf5",
+      "length": 49,
+      "seed": 116,
+      "sha256": "e6155c2c3a6f916156d36c5044056c15080226335ac0fd19b1ba452572eb5841",
+      "success": true
+    },
+    {
+      "file": "episode_00075.hdf5",
+      "length": 8,
+      "seed": 117,
+      "sha256": "25f371dac1da0506992db1537e1006b70da0adc36cb4f871d71ad1ace19aeb10",
+      "success": true
+    },
+    {
+      "file": "episode_00076.hdf5",
+      "length": 65,
+      "seed": 118,
+      "sha256": "ec8d3619cafa7097753309abb1e17a7e08fb3d44039f782bc0375cf27ccfa572",
+      "success": true
+    },
+    {
+      "file": "episode_00077.hdf5",
+      "length": 8,
+      "seed": 119,
+      "sha256": "6af397519057968477c0babefb28c99c1b1d6cf6ff055218d20b57ad917d3396",
+      "success": true
+    },
+    {
+      "file": "episode_00078.hdf5",
+      "length": 32,
+      "seed": 120,
+      "sha256": "1b09085197d06ea48ccfb54da4fb7d2478bbd5497f6e3a62cb3aaf87d7c1f24a",
+      "success": true
+    },
+    {
+      "file": "episode_00079.hdf5",
+      "length": 17,
+      "seed": 121,
+      "sha256": "7f2ae297e7cf7063dc755542c47e9ab9b9a786746801a5d58f8f1a2fc54af202",
+      "success": true
+    },
+    {
+      "file": "episode_00080.hdf5",
+      "length": 75,
+      "seed": 122,
+      "sha256": "5cad1307eec19e3e04158f4164e60aef62d76572d81b6a9df302a12f7228b72b",
+      "success": false
+    },
+    {
+      "file": "episode_00081.hdf5",
+      "length": 75,
+      "seed": 123,
+      "sha256": "99eb04521add9aee94da6c0205b6f8bae95cffd52e9b8404ac65af8d09d9b7de",
+      "success": false
+    },
+    {
+      "file": "episode_00082.hdf5",
+      "length": 75,
+      "seed": 124,
+      "sha256": "44cdc4de7a24cca910ca2e5899d2b61ef079718cd54818ed2bb30fcf96902c90",
+      "success": false
+    },
+    {
+      "file": "episode_00083.hdf5",
+      "length": 75,
+      "seed": 125,
+      "sha256": "0d1231a6717e3f94b4fc19416318c6bc22b99eff4c151d619ad2040ecac24b45",
+      "success": false
+    },
+    {
+      "file": "episode_00084.hdf5",
+      "length": 41,
+      "seed": 126,
+      "sha256": "464e7cc8c993c2caf29c1cc4bd929098f2adb3436c344baa0ea17d8a82881ef8",
+      "success": true
+    },
+    {
+      "file": "episode_00085.hdf5",
+      "length": 23,
+      "seed": 127,
+      "sha256": "a4900d94957ebe7506d560a7dc5df947affa7a1387c8a721b0c869663c36e5d4",
+      "success": true
+    },
+    {
+      "file": "episode_00086.hdf5",
+      "length": 29,
+      "seed": 128,
+      "sha256": "4701e8fcbde7a35740465166c1e693e4ba308383f213d9735a6f98fc440e8c30",
+      "success": true
+    },
+    {
+      "file": "episode_00087.hdf5",
+      "length": 6,
+      "seed": 129,
+      "sha256": "f9d26c645e86e327b205219ba1a65d0a30bcfe2bb17210938fa721b5f4dec0a6",
+      "success": true
+    },
+    {
+      "file": "episode_00088.hdf5",
+      "length": 7,
+      "seed": 130,
+      "sha256": "075bcf81d15a5a24e4ee3a0baad0e66d80724e64db44db67b7a4b6247b27f896",
+      "success": true
+    },
+    {
+      "file": "episode_00089.hdf5",
+      "length": 21,
+      "seed": 131,
+      "sha256": "16edc951f5712aba33a02d4b69f4c5298d036fc76aebdadb9bce4bb002e1442c",
+      "success": true
+    },
+    {
+      "file": "episode_00090.hdf5",
+      "length": 5,
+      "seed": 132,
+      "sha256": "2c3dec94cba2bfa0d88eae2a5885ac8cd3030f9267306d40597b20ea969d8c2c",
+      "success": true
+    },
+    {
+      "file": "episode_00091.hdf5",
+      "length": 75,
+      "seed": 133,
+      "sha256": "1ca0657f897288edc81bf5cc8d9219ce716609a51c7186ea7c7e18db13e0e391",
+      "success": false
+    },
+    {
+      "file": "episode_00092.hdf5",
+      "length": 71,
+      "seed": 134,
+      "sha256": "64a69ebc60d8eb54beabb3a241119c511f434cdc56cfeea27f34e6d260ffca32",
+      "success": true
+    },
+    {
+      "file": "episode_00093.hdf5",
+      "length": 75,
+      "seed": 135,
+      "sha256": "daeebaf5c8c47f60dbd741f24f4956dfa51417d19cf8f5d85821bfaa22739b25",
+      "success": false
+    },
+    {
+      "file": "episode_00094.hdf5",
+      "length": 35,
+      "seed": 136,
+      "sha256": "0fb7c165a92000e23939572a58d3d09a19a07152e471319c9d751fd55fb22d15",
+      "success": true
+    },
+    {
+      "file": "episode_00095.hdf5",
+      "length": 75,
+      "seed": 137,
+      "sha256": "b0aae8482166fbf0ac7233ca95a5a71d1fba581489a1c0990170cedf2fa27350",
+      "success": false
+    },
+    {
+      "file": "episode_00096.hdf5",
+      "length": 75,
+      "seed": 138,
+      "sha256": "e2e6de1e6b23bfa6d5b388b6885c2bac710b94d9a12a304397bffce9c0537b9c",
+      "success": false
+    },
+    {
+      "file": "episode_00097.hdf5",
+      "length": 29,
+      "seed": 139,
+      "sha256": "65954816b3673abb2d7ef441dee6a581ec333efca966e7778bd94385bab650ff",
+      "success": true
+    },
+    {
+      "file": "episode_00098.hdf5",
+      "length": 3,
+      "seed": 140,
+      "sha256": "d93d856f9c85139dc78eee9ef23abe867e920f14f08264dd1a46b7b0d9e43dfe",
+      "success": true
+    },
+    {
+      "file": "episode_00099.hdf5",
+      "length": 12,
+      "seed": 141,
+      "sha256": "d2fd54dd263a8039c7b93da90f423676a9f9f0646c6f6e4336c1dc7e3bc07b44",
+      "success": true
+    }
+  ],
+  "manifest_checksums_valid": true,
+  "schema_version": 1,
+  "seed_max": 141,
+  "seed_min": 42,
+  "status": "passed",
+  "successes": 60,
+  "terminal_flags_valid": true,
+  "total_transitions": 4459,
+  "unique_seeds": 100
+}

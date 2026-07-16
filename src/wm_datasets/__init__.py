@@ -9,8 +9,6 @@ This module provides a unified data loading pipeline with three layers:
 
 from .data_source import (
     DataSource,
-    DinoWorldModelDataSource,
-    LeRobotDataSource,
     TrajectoryData,
     create_data_source,
 )
@@ -22,11 +20,31 @@ from .world_model_dataset import (
     create_train_val_datasets,
 )
 
+
+def __getattr__(name):
+    """Preserve concrete DataSource exports without eager optional imports."""
+    if name in {
+        "DinoWorldModelDataSource",
+        "PushTDataSource",
+        "DeformableEnvDataSource",
+        "LeRobotDataSource",
+        "CSGODataSource",
+        "VizDoomDataSource",
+    }:
+        from . import data_source
+
+        return getattr(data_source, name)
+    raise AttributeError(name)
+
 __all__ = [
     # DataSource layer
     "DataSource",
     "DinoWorldModelDataSource",
+    "PushTDataSource",
+    "DeformableEnvDataSource",
     "LeRobotDataSource",
+    "CSGODataSource",
+    "VizDoomDataSource",
     "TrajectoryData",
     "create_data_source",
 

@@ -7,22 +7,22 @@ This file is the only source of truth for execution status. The [project plan](d
 | Field | Value |
 | --- | --- |
 | Last updated | 2026-07-15 |
-| Overall status | Day 1 exit gate passed; Day 2 alignment and loading are next |
-| Current phase | Week 1 — environment and data |
-| Active milestone | Day 2 — alignment and data loading |
+| Overall status | Week 1 data exit gate passed; Day 3 model smoke test is next |
+| Current phase | Week 2 — baseline pipeline |
+| Active milestone | Day 3 — model smoke test |
 | Blocked | No |
 
 Legend: `[ ]` not started · `[x]` complete. Add an evidence link before checking an engineering or experimental task.
 
 ## Next Up
 
-1. Validate the HDF5 schema across all 10 pilot episodes.
-2. Plot three pilot episodes and inspect the action distribution.
-3. Verify explicitly that action $a_t$ maps observation $o_t$ to $o_{t+1}$.
-4. Implement and register `VizDoomDataSource` using the validated alignment.
-5. Load and save evidence for one batch with one context frame and three future frames.
+1. Run frozen VAE encode/decode on a verified four-frame VizDoom batch.
+2. Freeze a deterministic set of 32 training clips.
+3. Overfit the 32 clips for 500–1,000 steps and render predictions.
+4. Save a checkpoint, restart the runtime, and resume the full trainer state.
+5. Record the reconstruction, training log, comparison video, and resume evidence.
 
-Do not collect the full dataset until frame/action alignment and a four-frame DataLoader batch pass their exit gates.
+Do not begin a long development run until the VAE, tiny-set overfit, generated-motion, and checkpoint-resume checks pass.
 
 ## Documentation Foundation
 
@@ -56,16 +56,20 @@ Evidence: [README](README.md) · [Project plan](docs/PROJECT_PLAN.md) · [Progre
 
 ### Day 2 — Alignment and Data Loading
 
-- [ ] Save frames, actions, rewards, terminal flags, and seeds.
-- [ ] Plot three random episodes.
-- [ ] Check the action distribution.
-- [ ] Verify that action $a_t$ maps observation $o_t$ to $o_{t+1}$.
-- [ ] Implement `VizDoomDataSource`.
-- [ ] Load one batch containing one context frame and three future frames.
+- [x] Save frames, actions, rewards, terminal flags, and seeds.
+- [x] Plot three representative episodes.
+- [x] Check the action distribution.
+- [x] Verify that action $a_t$ maps observation $o_t$ to $o_{t+1}$.
+- [x] Implement `VizDoomDataSource`.
+- [x] Load one batch containing one context frame and three future frames.
 
 **Exit gate:** a DataLoader batch returns the expected four frames and correctly aligned action sequence.
 
 **Expected artifacts:** verified batch dump, dataset visualization, action-distribution plot, and alignment report.
+
+**Current evidence:** [dataset validation](reports/evidence/day2/dataset-validation.json) · [alignment report](reports/evidence/day2/alignment-report.json) · [batch summary](reports/evidence/day2/batch-summary.json) · [episode visualization](reports/evidence/day2/episode-visualization.png) · [action distribution](reports/evidence/day2/action-distribution.png) · [batch preview](reports/evidence/day2/batch-preview.png)
+
+**Gate state:** passed with 100 episodes (seeds 42–141), 4,459 stored transitions, 4,359 replay-verified observation-to-observation transitions, and a `[2, 4, 3, 256, 256]` video / `[2, 4, 3]` action batch. All three actions are balanced within 1.3 percentage points.
 
 ### Day 3 — Model Smoke Test
 
@@ -85,16 +89,18 @@ Evidence: [README](README.md) · [Project plan](docs/PROJECT_PLAN.md) · [Progre
 ### Week 1 — Environment and Data
 
 - [x] Complete all Day 1 tasks.
-- [ ] Collect 100 pilot episodes only after the first 10 validate correctly.
-- [ ] Implement the HDF5 episode format.
-- [ ] Visualize frame sequences and action distributions.
-- [ ] Verify frame/action alignment and terminal handling.
-- [ ] Implement and register `VizDoomDataSource`.
-- [ ] Add the VizDoom Basic Hydra dataset configuration.
+- [x] Collect 100 pilot episodes only after the first 10 validate correctly.
+- [x] Implement the HDF5 episode format.
+- [x] Visualize frame sequences and action distributions.
+- [x] Verify frame/action alignment and terminal handling.
+- [x] Implement and register `VizDoomDataSource`.
+- [x] Add the VizDoom Basic Hydra dataset configuration.
 
 **Exit gate:** a DataLoader batch returns one context frame, three future frames, and the correctly aligned action sequence.
 
 **Expected artifacts:** collector, DataSource, pilot dataset, seed metadata, and visualization notebook.
+
+**Gate state:** passed. The 100-episode pilot is stored in the gitignored data directory; the tracked Day 2 reports contain schema, checksum, seed, action-distribution, replay-alignment, Hydra/DataLoader, and visualization evidence.
 
 ### Week 2 — Baseline Pipeline
 
@@ -255,6 +261,8 @@ When adding a blocker, record its date, affected milestone, owner, attempted mit
 | 2026-07-14 | Keep Day 1 partially open until a fresh Colab smoke run passes | Local VizDoom evidence does not validate the GPU training runtime |
 | 2026-07-15 | Preserve Colab's binary and platform package stack | Downgrading NumPy and h5py caused an ABI mismatch in the Python 3.12 runtime |
 | 2026-07-15 | Accept the fresh T4 smoke run as the Day 1 environment baseline | Hydra composition, strict dependency checking, deterministic collection, and evidence generation passed without model download or training |
+| 2026-07-15 | Treat stored action $a_t$ as the transition from observation $o_t$ to $o_{t+1}$ | Matches the collector and NanoWM's internal one-step action shift; replay verified all 100 pilot episodes |
+| 2026-07-15 | Use letterbox resizing for VizDoom and keep collection frame skip outside the loader | Preserves the 4:3 image geometry while avoiding a second temporal subsampling step |
 
 ## Evidence Index
 
@@ -269,7 +277,10 @@ When adding a blocker, record its date, affected milestone, owner, attempted mit
 | Pilot episode video | [reports/evidence/day1/pilot_episode_00000.mp4](reports/evidence/day1/pilot_episode_00000.mp4) | Complete |
 | Colab environment smoke-test report | [reports/evidence/day1/smoke-report.json](reports/evidence/day1/smoke-report.json) | Complete |
 | Colab dependency freeze | [reports/evidence/day1/pip-freeze.txt](reports/evidence/day1/pip-freeze.txt) | Complete |
-| Dataset validation report | — | Not produced |
+| Day 2 dataset validation | [reports/evidence/day2/dataset-validation.json](reports/evidence/day2/dataset-validation.json) | Passed on 100 episodes |
+| Day 2 alignment report | [reports/evidence/day2/alignment-report.json](reports/evidence/day2/alignment-report.json) | Passed on 4,359 aligned transitions |
+| Day 2 DataLoader batch | [reports/evidence/day2/batch-summary.json](reports/evidence/day2/batch-summary.json) | Passed: 1 context + 3 future frames |
+| Day 2 visual evidence | [reports/evidence/day2/episode-visualization.png](reports/evidence/day2/episode-visualization.png) · [action distribution](reports/evidence/day2/action-distribution.png) · [batch preview](reports/evidence/day2/batch-preview.png) | Complete |
 | Baseline checkpoint | — | Not produced |
 | Action-aware checkpoint | — | Not produced |
 | Final metrics | — | Not produced |

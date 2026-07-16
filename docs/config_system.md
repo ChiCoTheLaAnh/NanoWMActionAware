@@ -22,7 +22,7 @@ src/configs/
 │   └── nanowm_{s2,l2}_csgo.yaml # CSGO-specific shapes (320×512 frames)
 ├── dataset/                     # Datasets
 │   ├── dino_wm/{base,point_maze,pusht,wall,rope,granular}.yaml
-│   ├── game/{base,csgo}.yaml
+│   ├── game/{base,csgo,vizdoom_basic}.yaml
 │   ├── rt1/{base,rt1}.yaml
 │   └── lerobot/base.yaml
 ├── planning/
@@ -184,6 +184,8 @@ Each dataset family has a `base.yaml` that fixes the schema, plus per-dataset ov
 
 **Game** (`src/configs/dataset/game/`):
 ```yaml
+# vizdoom_basic.yaml — 3 discrete one-hot actions, exhaustive episode slicing,
+#                       letterbox resize, collection frame skip already applied
 # csgo.yaml — train_slice_mode=random (5000 episodes × 1000 frames),
 #             val_slice_mode=exhaustive with fixed start indices
 #             action_dim=51 (keys + mouse), normalize_action=False

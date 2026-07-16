@@ -1,0 +1,610 @@
+{
+  "aligned_transitions_checked": 4359,
+  "contract": "action[t] maps observation[t] to observation[t+1]",
+  "episodes": [
+    {
+      "aligned_transitions_checked": 29,
+      "file": "episode_00000.hdf5",
+      "frames_checked": 30,
+      "seed": 42
+    },
+    {
+      "aligned_transitions_checked": 11,
+      "file": "episode_00001.hdf5",
+      "frames_checked": 12,
+      "seed": 43
+    },
+    {
+      "aligned_transitions_checked": 39,
+      "file": "episode_00002.hdf5",
+      "frames_checked": 40,
+      "seed": 44
+    },
+    {
+      "aligned_transitions_checked": 6,
+      "file": "episode_00003.hdf5",
+      "frames_checked": 7,
+      "seed": 45
+    },
+    {
+      "aligned_transitions_checked": 2,
+      "file": "episode_00004.hdf5",
+      "frames_checked": 3,
+      "seed": 46
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00005.hdf5",
+      "frames_checked": 75,
+      "seed": 47
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00006.hdf5",
+      "frames_checked": 75,
+      "seed": 48
+    },
+    {
+      "aligned_transitions_checked": 22,
+      "file": "episode_00007.hdf5",
+      "frames_checked": 23,
+      "seed": 49
+    },
+    {
+      "aligned_transitions_checked": 32,
+      "file": "episode_00008.hdf5",
+      "frames_checked": 33,
+      "seed": 50
+    },
+    {
+      "aligned_transitions_checked": 9,
+      "file": "episode_00009.hdf5",
+      "frames_checked": 10,
+      "seed": 51
+    },
+    {
+      "aligned_transitions_checked": 7,
+      "file": "episode_00010.hdf5",
+      "frames_checked": 8,
+      "seed": 52
+    },
+    {
+      "aligned_transitions_checked": 1,
+      "file": "episode_00011.hdf5",
+      "frames_checked": 2,
+      "seed": 53
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00012.hdf5",
+      "frames_checked": 75,
+      "seed": 54
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00013.hdf5",
+      "frames_checked": 75,
+      "seed": 55
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00014.hdf5",
+      "frames_checked": 75,
+      "seed": 56
+    },
+    {
+      "aligned_transitions_checked": 2,
+      "file": "episode_00015.hdf5",
+      "frames_checked": 3,
+      "seed": 57
+    },
+    {
+      "aligned_transitions_checked": 17,
+      "file": "episode_00016.hdf5",
+      "frames_checked": 18,
+      "seed": 58
+    },
+    {
+      "aligned_transitions_checked": 20,
+      "file": "episode_00017.hdf5",
+      "frames_checked": 21,
+      "seed": 59
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00018.hdf5",
+      "frames_checked": 75,
+      "seed": 60
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00019.hdf5",
+      "frames_checked": 75,
+      "seed": 61
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00020.hdf5",
+      "frames_checked": 75,
+      "seed": 62
+    },
+    {
+      "aligned_transitions_checked": 3,
+      "file": "episode_00021.hdf5",
+      "frames_checked": 4,
+      "seed": 63
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00022.hdf5",
+      "frames_checked": 75,
+      "seed": 64
+    },
+    {
+      "aligned_transitions_checked": 23,
+      "file": "episode_00023.hdf5",
+      "frames_checked": 24,
+      "seed": 65
+    },
+    {
+      "aligned_transitions_checked": 4,
+      "file": "episode_00024.hdf5",
+      "frames_checked": 5,
+      "seed": 66
+    },
+    {
+      "aligned_transitions_checked": 67,
+      "file": "episode_00025.hdf5",
+      "frames_checked": 68,
+      "seed": 67
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00026.hdf5",
+      "frames_checked": 75,
+      "seed": 68
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00027.hdf5",
+      "frames_checked": 75,
+      "seed": 69
+    },
+    {
+      "aligned_transitions_checked": 4,
+      "file": "episode_00028.hdf5",
+      "frames_checked": 5,
+      "seed": 70
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00029.hdf5",
+      "frames_checked": 75,
+      "seed": 71
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00030.hdf5",
+      "frames_checked": 75,
+      "seed": 72
+    },
+    {
+      "aligned_transitions_checked": 7,
+      "file": "episode_00031.hdf5",
+      "frames_checked": 8,
+      "seed": 73
+    },
+    {
+      "aligned_transitions_checked": 2,
+      "file": "episode_00032.hdf5",
+      "frames_checked": 3,
+      "seed": 74
+    },
+    {
+      "aligned_transitions_checked": 32,
+      "file": "episode_00033.hdf5",
+      "frames_checked": 33,
+      "seed": 75
+    },
+    {
+      "aligned_transitions_checked": 58,
+      "file": "episode_00034.hdf5",
+      "frames_checked": 59,
+      "seed": 76
+    },
+    {
+      "aligned_transitions_checked": 2,
+      "file": "episode_00035.hdf5",
+      "frames_checked": 3,
+      "seed": 77
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00036.hdf5",
+      "frames_checked": 75,
+      "seed": 78
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00037.hdf5",
+      "frames_checked": 75,
+      "seed": 79
+    },
+    {
+      "aligned_transitions_checked": 27,
+      "file": "episode_00038.hdf5",
+      "frames_checked": 28,
+      "seed": 80
+    },
+    {
+      "aligned_transitions_checked": 28,
+      "file": "episode_00039.hdf5",
+      "frames_checked": 29,
+      "seed": 81
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00040.hdf5",
+      "frames_checked": 75,
+      "seed": 82
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00041.hdf5",
+      "frames_checked": 75,
+      "seed": 83
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00042.hdf5",
+      "frames_checked": 75,
+      "seed": 84
+    },
+    {
+      "aligned_transitions_checked": 52,
+      "file": "episode_00043.hdf5",
+      "frames_checked": 53,
+      "seed": 85
+    },
+    {
+      "aligned_transitions_checked": 17,
+      "file": "episode_00044.hdf5",
+      "frames_checked": 18,
+      "seed": 86
+    },
+    {
+      "aligned_transitions_checked": 70,
+      "file": "episode_00045.hdf5",
+      "frames_checked": 71,
+      "seed": 87
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00046.hdf5",
+      "frames_checked": 75,
+      "seed": 88
+    },
+    {
+      "aligned_transitions_checked": 61,
+      "file": "episode_00047.hdf5",
+      "frames_checked": 62,
+      "seed": 89
+    },
+    {
+      "aligned_transitions_checked": 15,
+      "file": "episode_00048.hdf5",
+      "frames_checked": 16,
+      "seed": 90
+    },
+    {
+      "aligned_transitions_checked": 1,
+      "file": "episode_00049.hdf5",
+      "frames_checked": 2,
+      "seed": 91
+    },
+    {
+      "aligned_transitions_checked": 58,
+      "file": "episode_00050.hdf5",
+      "frames_checked": 59,
+      "seed": 92
+    },
+    {
+      "aligned_transitions_checked": 37,
+      "file": "episode_00051.hdf5",
+      "frames_checked": 38,
+      "seed": 93
+    },
+    {
+      "aligned_transitions_checked": 11,
+      "file": "episode_00052.hdf5",
+      "frames_checked": 12,
+      "seed": 94
+    },
+    {
+      "aligned_transitions_checked": 15,
+      "file": "episode_00053.hdf5",
+      "frames_checked": 16,
+      "seed": 95
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00054.hdf5",
+      "frames_checked": 75,
+      "seed": 96
+    },
+    {
+      "aligned_transitions_checked": 27,
+      "file": "episode_00055.hdf5",
+      "frames_checked": 28,
+      "seed": 97
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00056.hdf5",
+      "frames_checked": 75,
+      "seed": 98
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00057.hdf5",
+      "frames_checked": 75,
+      "seed": 99
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00058.hdf5",
+      "frames_checked": 75,
+      "seed": 100
+    },
+    {
+      "aligned_transitions_checked": 2,
+      "file": "episode_00059.hdf5",
+      "frames_checked": 3,
+      "seed": 101
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00060.hdf5",
+      "frames_checked": 75,
+      "seed": 102
+    },
+    {
+      "aligned_transitions_checked": 5,
+      "file": "episode_00061.hdf5",
+      "frames_checked": 6,
+      "seed": 103
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00062.hdf5",
+      "frames_checked": 75,
+      "seed": 104
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00063.hdf5",
+      "frames_checked": 75,
+      "seed": 105
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00064.hdf5",
+      "frames_checked": 75,
+      "seed": 106
+    },
+    {
+      "aligned_transitions_checked": 29,
+      "file": "episode_00065.hdf5",
+      "frames_checked": 30,
+      "seed": 107
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00066.hdf5",
+      "frames_checked": 75,
+      "seed": 108
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00067.hdf5",
+      "frames_checked": 75,
+      "seed": 109
+    },
+    {
+      "aligned_transitions_checked": 41,
+      "file": "episode_00068.hdf5",
+      "frames_checked": 42,
+      "seed": 110
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00069.hdf5",
+      "frames_checked": 75,
+      "seed": 111
+    },
+    {
+      "aligned_transitions_checked": 17,
+      "file": "episode_00070.hdf5",
+      "frames_checked": 18,
+      "seed": 112
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00071.hdf5",
+      "frames_checked": 75,
+      "seed": 113
+    },
+    {
+      "aligned_transitions_checked": 44,
+      "file": "episode_00072.hdf5",
+      "frames_checked": 45,
+      "seed": 114
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00073.hdf5",
+      "frames_checked": 75,
+      "seed": 115
+    },
+    {
+      "aligned_transitions_checked": 48,
+      "file": "episode_00074.hdf5",
+      "frames_checked": 49,
+      "seed": 116
+    },
+    {
+      "aligned_transitions_checked": 7,
+      "file": "episode_00075.hdf5",
+      "frames_checked": 8,
+      "seed": 117
+    },
+    {
+      "aligned_transitions_checked": 64,
+      "file": "episode_00076.hdf5",
+      "frames_checked": 65,
+      "seed": 118
+    },
+    {
+      "aligned_transitions_checked": 7,
+      "file": "episode_00077.hdf5",
+      "frames_checked": 8,
+      "seed": 119
+    },
+    {
+      "aligned_transitions_checked": 31,
+      "file": "episode_00078.hdf5",
+      "frames_checked": 32,
+      "seed": 120
+    },
+    {
+      "aligned_transitions_checked": 16,
+      "file": "episode_00079.hdf5",
+      "frames_checked": 17,
+      "seed": 121
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00080.hdf5",
+      "frames_checked": 75,
+      "seed": 122
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00081.hdf5",
+      "frames_checked": 75,
+      "seed": 123
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00082.hdf5",
+      "frames_checked": 75,
+      "seed": 124
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00083.hdf5",
+      "frames_checked": 75,
+      "seed": 125
+    },
+    {
+      "aligned_transitions_checked": 40,
+      "file": "episode_00084.hdf5",
+      "frames_checked": 41,
+      "seed": 126
+    },
+    {
+      "aligned_transitions_checked": 22,
+      "file": "episode_00085.hdf5",
+      "frames_checked": 23,
+      "seed": 127
+    },
+    {
+      "aligned_transitions_checked": 28,
+      "file": "episode_00086.hdf5",
+      "frames_checked": 29,
+      "seed": 128
+    },
+    {
+      "aligned_transitions_checked": 5,
+      "file": "episode_00087.hdf5",
+      "frames_checked": 6,
+      "seed": 129
+    },
+    {
+      "aligned_transitions_checked": 6,
+      "file": "episode_00088.hdf5",
+      "frames_checked": 7,
+      "seed": 130
+    },
+    {
+      "aligned_transitions_checked": 20,
+      "file": "episode_00089.hdf5",
+      "frames_checked": 21,
+      "seed": 131
+    },
+    {
+      "aligned_transitions_checked": 4,
+      "file": "episode_00090.hdf5",
+      "frames_checked": 5,
+      "seed": 132
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00091.hdf5",
+      "frames_checked": 75,
+      "seed": 133
+    },
+    {
+      "aligned_transitions_checked": 70,
+      "file": "episode_00092.hdf5",
+      "frames_checked": 71,
+      "seed": 134
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00093.hdf5",
+      "frames_checked": 75,
+      "seed": 135
+    },
+    {
+      "aligned_transitions_checked": 34,
+      "file": "episode_00094.hdf5",
+      "frames_checked": 35,
+      "seed": 136
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00095.hdf5",
+      "frames_checked": 75,
+      "seed": 137
+    },
+    {
+      "aligned_transitions_checked": 74,
+      "file": "episode_00096.hdf5",
+      "frames_checked": 75,
+      "seed": 138
+    },
+    {
+      "aligned_transitions_checked": 28,
+      "file": "episode_00097.hdf5",
+      "frames_checked": 29,
+      "seed": 139
+    },
+    {
+      "aligned_transitions_checked": 2,
+      "file": "episode_00098.hdf5",
+      "frames_checked": 3,
+      "seed": 140
+    },
+    {
+      "aligned_transitions_checked": 11,
+      "file": "episode_00099.hdf5",
+      "frames_checked": 12,
+      "seed": 141
+    }
+  ],
+  "episodes_checked": 100,
+  "frames_checked": 4459,
+  "status": "passed",
+  "terminal_action_note": "The final stored action terminates the episode and has no stored successor; NanoWM ignores the final clip action after its internal one-step shift."
+}

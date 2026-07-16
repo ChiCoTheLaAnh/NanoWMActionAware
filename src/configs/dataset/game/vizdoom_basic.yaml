@@ -1,0 +1,20 @@
+defaults:
+  - game/base
+
+name: "vizdoom_basic"
+frame_interval: 1  # The collector already applies VizDoom frame_skip=4.
+
+loader:
+  data_path: "${dataset_dir}/vizdoom_basic/pilot"
+  n_rollout: null
+  split_ratio: 0.9
+  normalize_state: false
+  normalize_action: false
+  resize_mode: "pad"
+  train_slice_mode: "exhaustive"
+  val_slice_mode: "exhaustive"
+  stride: 1
+  random_seed: 42
+
+spec:
+  action_dim: 3
